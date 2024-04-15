@@ -27,11 +27,11 @@ model User {
   middle_name       String?
   last_name         String?
   verification_code String?
-  is_active         Boolean
-  is_reported       Boolean
-  is_blocked        Boolean
-  createdAt         DateTime
-  updatedAt         DateTime
+  is_active         Boolean       @default(false)
+  is_reported       Boolean       @default(false)
+  is_blocked        Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime?
   Participants      Participants? @relation(fields: [participantsId], references: [id])
   participantsId    Int?
 }

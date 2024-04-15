@@ -56,13 +56,6 @@ export const typeDefs = `#graphql
 			password: String
 		): Response
 
-		register(
-			fName: String,
-			lName: String,
-			email: String,
-			username: String,
-			password: String
-		): Response
 
 		getMessages(
 			conversationId: String
@@ -73,6 +66,16 @@ export const typeDefs = `#graphql
 
 
 	type Mutation {
+
+
+		registerUser(
+			email: String,
+			phone: String,
+			password: String
+			firstName: String,
+			middleName: String,
+			lastName: String,
+		): Response
 
 		postMessage(
 			content: String,
