@@ -34,16 +34,8 @@ export const resolvers = {
 
 		getMessages: async (_parent: any, args: any) => {
 			
-			const data =  await prisma.message.findMany({
-				where: {
-					conversationId: args.conversationId
-				}
-			})
-
+			const data =  await prisma.conversation.findMany()
 			console.log(data)
-
-			
-
 			return "test"
 		}
 
@@ -52,39 +44,23 @@ export const resolvers = {
 	Mutation: {
 		postMessage: async (_parent: any, args: {content: string, senderId: string, conversationId: string, sender: {fname: string, lname:string}}) => {
 			try {
-				let conversation;
-				// Check if conversation already exists
-				const existingConversation = await prisma.conversation.findUnique({
-						where: {
-								id: args.conversationId
-						}
-				});
 
-				// If conversation does not exist, create it
-				if (!existingConversation) {
-						conversation = await prisma.conversation.create({
-								data: {
-										id: args.conversationId, // Ensure conversation id is passed
-										// Optionally, add participants if needed
-								}
-						});
-				} else {
-						conversation = existingConversation;
-				}
-
-				// Create message
 				const message = await prisma.message.create({
-						data: {
-							content: args.content,
-							senderId: args.senderId,
-							conversationId: args.conversationId,
-						}
+					data: {
+						content: args.content,
+						senderId: args.senderId,
+						conversationId: args.conversationId,
+					}
 				});
+
+				console.log(message)
 
 				return {
 					status: 200,
 					statusText: "Sent"
 				}
+
+
 			} catch (error) {
 				console.error("Error posting message:", error);
 				throw new Error("Failed to post message");

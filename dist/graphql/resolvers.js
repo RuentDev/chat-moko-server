@@ -18,11 +18,7 @@ export const resolvers = {
             };
         },
         getMessages: async (_parent, args) => {
-            const data = await prisma.message.findMany({
-                where: {
-                    conversationId: args.conversationId
-                }
-            });
+            const data = await prisma.conversation.findMany();
             console.log(data);
             return "test";
         }
@@ -30,22 +26,6 @@ export const resolvers = {
     Mutation: {
         postMessage: async (_parent, args) => {
             try {
-                let conversation;
-                const existingConversation = await prisma.conversation.findUnique({
-                    where: {
-                        id: args.conversationId
-                    }
-                });
-                if (!existingConversation) {
-                    conversation = await prisma.conversation.create({
-                        data: {
-                            id: args.conversationId,
-                        }
-                    });
-                }
-                else {
-                    conversation = existingConversation;
-                }
                 const message = await prisma.message.create({
                     data: {
                         content: args.content,
@@ -53,6 +33,7 @@ export const resolvers = {
                         conversationId: args.conversationId,
                     }
                 });
+                console.log(message);
                 return {
                     status: 200,
                     statusText: "Sent"
