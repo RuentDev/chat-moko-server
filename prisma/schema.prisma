@@ -8,46 +8,93 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  USER
+}
+
+enum MessageType {
+  SINGLE_CHAT
+  GROUP_CHAT
+}
+
 model User {
-  id             String        @id @default(cuid())
-  username       String        @unique
-  email          String        @unique
-  password       String        @db.LongText
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  // Add more user-related fields as needed
-  Message        Message[]
-  Conversation   Conversation? @relation(fields: [conversationId], references: [id])
-  conversationId String?
+  id                Int           @id @default(autoincrement())
+  email             String        @unique
+  phone             String
+  password          String?
+  first_name        String?
+  middle_name       String?
+  last_name         String?
+  verification_code String?
+  is_active         Boolean
+  is_reported       Boolean
+  is_blocked        Boolean
+  createdAt         DateTime
+  updatedAt         DateTime
+  Participants      Participants? @relation(fields: [participantsId], references: [id])
+  participantsId    Int?
 }
 
-// Conversation model representing a conversation between users
+model Participants {
+  id              Int         @id @default(autoincrement())
+  conversation_id Int
+  users_id        User[]
+  type            MessageType @default(SINGLE_CHAT)
+}
+
 model Conversation {
-  id           String    @id @default(cuid())
-  participants User[] // Many-to-many relationship with users
-  messages     Message[] // One-to-many relationship with messages
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id         Int       @id @default(autoincrement())
+  title      String
+  creator_id Int
+  channel_id String
+  createdAt  DateTime
+  updatedAt  DateTime?
+  deletedAt  DateTime?
+  Message    Message[]
 }
 
-// Message model representing individual messages sent in conversations
 model Message {
-  id             String       @id @default(cuid())
-  content        String       @db.LongText
-  media          String? // URL or file path to media (e.g., images, videos)
-  files          File[]
-  senderId       String
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
-  conversationId String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime?
-  User           User?        @relation(fields: [userId], references: [id])
-  userId         String?
+  id                    Int           @id @default(autoincrement())
+  sender_id             Int
+  message_type          MessageType   @default(SINGLE_CHAT)
+  Conversation          Conversation? @relation(fields: [conversation_id], references: [id])
+  conversation_id       Int
+  message               String
+  attachement_thumb_url String?
+  attachement_url       String
+  createdAt             DateTime
+  updatedAt             DateTime?
+  deletedAt             DateTime?
 }
 
-model File {
-  id        String  @id @default(cuid())
-  url       String // URL or file path to the file
-  message   Message @relation(fields: [messageId], references: [id])
-  messageId String
-}
+// // Conversation model representing a conversation between users
+// model Conversation {
+//   id           String    @id @default(cuid())
+//   participants User[] // Many-to-many relationship with users
+//   messages     Message[] // One-to-many relationship with messages
+//   createdAt    DateTime  @default(now())
+//   updatedAt    DateTime  @updatedAt
+// }
+
+// // Message model representing individual messages sent in conversations
+// model Message {
+//   id             String       @id @default(cuid())
+//   content        String       @db.LongText
+//   media          String? // URL or file path to media (e.g., images, videos)
+//   files          File[]
+//   senderId       String
+//   conversation   Conversation @relation(fields: [conversationId], references: [id])
+//   conversationId String
+//   createdAt      DateTime     @default(now())
+//   updatedAt      DateTime?
+//   User           User?        @relation(fields: [userId], references: [id])
+//   userId         String?
+// }
+
+// model File {
+//   id        String  @id @default(cuid())
+//   url       String // URL or file path to the file
+//   message   Message @relation(fields: [messageId], references: [id])
+//   messageId String
+// }
