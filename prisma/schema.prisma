@@ -37,21 +37,24 @@ model User {
 }
 
 model Participants {
-  id              Int         @id @default(autoincrement())
+  id              Int            @id @default(autoincrement())
   conversation_id Int
   users_id        User[]
-  type            MessageType @default(SINGLE_CHAT)
+  type            MessageType    @default(SINGLE_CHAT)
+  Conversation    Conversation[]
 }
 
 model Conversation {
-  id         Int       @id @default(autoincrement())
-  title      String
-  creator_id Int
-  channel_id String
-  createdAt  DateTime
-  updatedAt  DateTime?
-  deletedAt  DateTime?
-  Message    Message[]
+  id             Int           @id @default(autoincrement())
+  title          String?
+  creator_id     String
+  channel_id     String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime?
+  deletedAt      DateTime?
+  message        Message[]
+  participants   Participants? @relation(fields: [participantsId], references: [id])
+  participantsId Int?
 }
 
 model Message {
