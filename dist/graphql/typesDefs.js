@@ -13,14 +13,26 @@ export const typeDefs = `#graphql
 
 	type User {
 		id: ID!
-		fname: String!
-		lname: String!
+		first_name: String!
+		last_name: String!
+		middle_name: String!
 		email: String!
-		username: String
-		contact: Int
+		phone: Int
 		password: String!
+		verification_code: String
+		is_active: Boolean
+		is_blocked: Boolean
+		createAt: Date
+		updatedAt: Date
+		participantsId: Int
 	}
 	
+	type AuthResponse {
+		user: String
+		statusText: String
+		error: String
+	}
+
 
 
 	type Message{
@@ -32,12 +44,6 @@ export const typeDefs = `#graphql
 		createdAt: Date
 		updatedAt: Date
 
-	}
-
-
-	type Response {
-		statusText: String
-		status: Int
 	}
 
 	type ChatResponse {
@@ -53,7 +59,7 @@ export const typeDefs = `#graphql
 		login( 
 			username: String, 
 			password: String
-		): Response
+		): AuthResponse
 
 
 		getMessages(
@@ -74,7 +80,7 @@ export const typeDefs = `#graphql
 			firstName: String,
 			middleName: String,
 			lastName: String,
-		): Response
+		): AuthResponse
 
 		postMessage(
 			content: String,
