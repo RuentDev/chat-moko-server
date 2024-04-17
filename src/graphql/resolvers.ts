@@ -20,7 +20,6 @@ export const resolvers = {
 		login: async (_parent: any, args: any) => {
 			try {
 
-
 				if (!jwt_secret) return {
 					user: undefined,
 					statusText: "Please set JWT_SECRET in .env file"
@@ -64,7 +63,7 @@ export const resolvers = {
 								updatedAt: userEmailExist.updatedAt,
 								participantsId: userEmailExist.participantsId,
 							}
-						}, jwt_secret, { algorithm: 'RS256', expiresIn: '30d' })
+						}, jwt_secret, { expiresIn: '30d' })
 
 
 						return {
@@ -154,7 +153,7 @@ export const resolvers = {
 						updatedAt: createRes.updatedAt,
 						participantsId: createRes.participantsId,
 					}
-				}, jwt_secret, { expiresIn: '30d' })
+				}, jwt_secret, { expiresIn: '1d' })
 
 				return {
 					user: token,
@@ -169,8 +168,52 @@ export const resolvers = {
 				}
 			}
 		},
-		postMessage: async (_parent: any, args: { content: string, senderId: string, conversationId: string, sender: { fname: string, lname: string } }) => {
+		sendMessage: async (_parent: any, { senderId, recipientId, message }: { senderId: string, recipientId: string, message: string }) => {
 			try {
+
+				const sender = await prisma.user.findUnique({
+					where: { id: senderId },
+				});
+				const recipient = await prisma.user.findUnique({
+					where: { id: recipientId },
+				});
+
+				if (!sender || !recipient) {
+					throw new Error('Sender or recipient not found');
+				}
+
+				// // Check if a conversation between sender and recipient exists
+				// let conversation = await prisma.conversation.findFirst({
+				//   where: {
+				//     AND: [
+				//       { users: { some: { id: senderId } } },
+				//       { users: { some: { id: recipientId } } },
+				//     ],
+				//   },
+				// });
+
+				// // If conversation doesn't exist, create a new one
+				// if (!conversation) {
+				//   conversation = await prisma.conversation.create({
+				//     data: {
+				//       title: `${sender.email} - ${recipient.email}`, // Customize as needed
+				//       creator_id: senderId,
+				//       users: {
+				//         connect: [{ id: senderId }, { id: recipientId }],
+				//       },
+				//     },
+				//   });
+				// }
+
+
+				const newMessage = await prisma.message.create({
+					data: {
+						sender_id: senderId,
+						message,
+						conversation_id: 0, // You need to handle conversation creation logic
+						message_type: "SINGLE_CHAT",
+					},
+				});
 
 
 

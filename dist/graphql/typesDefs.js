@@ -82,7 +82,7 @@ export const typeDefs = `#graphql
 			lastName: String,
 		): AuthResponse
 
-		postMessage(
+		sendMessage(
 			content: String,
 			senderId: String,
 			conversationId: String

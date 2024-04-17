@@ -19,7 +19,7 @@ enum MessageType {
 }
 
 model User {
-  id                Int           @id @default(autoincrement())
+  id                String        @id @unique @default(uuid())
   email             String        @unique
   phone             String
   password          String?
@@ -56,14 +56,14 @@ model Conversation {
 
 model Message {
   id                    Int           @id @default(autoincrement())
-  sender_id             Int
+  sender_id             String
   message_type          MessageType   @default(SINGLE_CHAT)
   Conversation          Conversation? @relation(fields: [conversation_id], references: [id])
   conversation_id       Int
   message               String
   attachement_thumb_url String?
-  attachement_url       String
-  createdAt             DateTime
+  attachement_url       String?
+  createdAt             DateTime      @default(now())
   updatedAt             DateTime?
   deletedAt             DateTime?
 }

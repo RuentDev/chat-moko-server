@@ -45,7 +45,7 @@ export const resolvers = {
                                 updatedAt: userEmailExist.updatedAt,
                                 participantsId: userEmailExist.participantsId,
                             }
-                        }, jwt_secret, { algorithm: 'RS256', expiresIn: '30d' });
+                        }, jwt_secret, { expiresIn: '30d' });
                         return {
                             user: token,
                             statusText: "Login Success!"
@@ -118,7 +118,7 @@ export const resolvers = {
                         updatedAt: createRes.updatedAt,
                         participantsId: createRes.participantsId,
                     }
-                }, jwt_secret, { expiresIn: '30d' });
+                }, jwt_secret, { expiresIn: '1d' });
                 return {
                     user: token,
                     statusText: "Create user success!"
@@ -131,8 +131,25 @@ export const resolvers = {
                 };
             }
         },
-        postMessage: async (_parent, args) => {
+        sendMessage: async (_parent, { senderId, recipientId, message }) => {
             try {
+                const sender = await prisma.user.findUnique({
+                    where: { id: senderId },
+                });
+                const recipient = await prisma.user.findUnique({
+                    where: { id: recipientId },
+                });
+                if (!sender || !recipient) {
+                    throw new Error('Sender or recipient not found');
+                }
+                const newMessage = await prisma.message.create({
+                    data: {
+                        sender_id: senderId,
+                        message,
+                        conversation_id: 0,
+                        message_type: "SINGLE_CHAT",
+                    },
+                });
                 return {
                     status: 200,
                     statusText: "Sent"
