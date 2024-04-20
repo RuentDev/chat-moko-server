@@ -12,17 +12,20 @@ config();
 const pubsub = new PubSub();
 const prisma = new PrismaClient();
 
+
+
 const jwt_secret = process.env.JWT_SECRET
 
 export const resolvers = {
 	Query: {
 
-		login: async (_parent: any, args: any) => {
+		login: async (_: any, args: any) => {
 			try {
 
-				if (!jwt_secret) return {
-					user: undefined,
-					statusText: "Please set JWT_SECRET in .env file"
+				if (!jwt_secret) {
+					return {
+						error: "Please set JWT_SECRET in .env file"
+					}
 				}
 
 
@@ -47,9 +50,6 @@ export const resolvers = {
 							}
 						}
 
-
-
-
 						const token = jwt.sign({
 							user: {
 								email: userEmailExist.email,
@@ -61,10 +61,8 @@ export const resolvers = {
 								is_blocked: userEmailExist.is_blocked,
 								createAt: userEmailExist.createdAt,
 								updatedAt: userEmailExist.updatedAt,
-								participantsId: userEmailExist.participantsId,
 							}
 						}, jwt_secret, { expiresIn: '30d' })
-
 
 						return {
 							user: token,
@@ -89,19 +87,28 @@ export const resolvers = {
 			}
 		},
 
-		getMessages: async (_parent: any, args: any) => {
+		getAllUserConversation: async (_: any, args: { userId: string }) => {
 
-			const data = await prisma.conversation.findMany()
-			console.log(data)
-			return "test"
+			// find all conversation of the user
+			const conversations = await prisma.conversation.findMany({
+				where: {
+					creatorId: args.userId
+				},
+				include: {
+					participants: true
+				}
+			})
+
+			console.log(conversations)
+
+			return conversations
 		}
 
 	},
 
 	Mutation: {
-		registerUser: async (parent: any, args: any) => {
+		registerUser: async (_: any, args: any) => {
 			try {
-
 
 				if (!jwt_secret) return {
 					user: undefined,
@@ -139,7 +146,6 @@ export const resolvers = {
 					}
 				})
 
-
 				const token = jwt.sign({
 					user: {
 						email: createRes.email,
@@ -151,7 +157,6 @@ export const resolvers = {
 						is_blocked: createRes.is_blocked,
 						createAt: createRes.createdAt,
 						updatedAt: createRes.updatedAt,
-						participantsId: createRes.participantsId,
 					}
 				}, jwt_secret, { expiresIn: '1d' })
 
@@ -159,76 +164,147 @@ export const resolvers = {
 					user: token,
 					statusText: "Create user success!"
 				}
-
-
 			} catch (error) {
+
+				console.log(error)
 				return {
 					error: error,
 					user: undefined
 				}
 			}
 		},
-		sendMessage: async (_parent: any, { senderId, recipientId, message }: { senderId: string, recipientId: string, message: string }) => {
+		sendMessage: async (_parent: any, { senderId, recipientId, content }: { senderId: string, recipientId: string, content: string }) => {
 			try {
 
+				let conversation = undefined
+
 				const sender = await prisma.user.findUnique({
-					where: { id: senderId },
+					where: {
+						id: senderId
+					}
 				});
+
 				const recipient = await prisma.user.findUnique({
-					where: { id: recipientId },
-				});
-
-				if (!sender || !recipient) {
-					throw new Error('Sender or recipient not found');
-				}
-
-				// // Check if a conversation between sender and recipient exists
-				// let conversation = await prisma.conversation.findFirst({
-				//   where: {
-				//     AND: [
-				//       { users: { some: { id: senderId } } },
-				//       { users: { some: { id: recipientId } } },
-				//     ],
-				//   },
-				// });
-
-				// // If conversation doesn't exist, create a new one
-				// if (!conversation) {
-				//   conversation = await prisma.conversation.create({
-				//     data: {
-				//       title: `${sender.email} - ${recipient.email}`, // Customize as needed
-				//       creator_id: senderId,
-				//       users: {
-				//         connect: [{ id: senderId }, { id: recipientId }],
-				//       },
-				//     },
-				//   });
-				// }
-
-
-				const newMessage = await prisma.message.create({
-					data: {
-						sender_id: senderId,
-						message,
-						conversation_id: 0, // You need to handle conversation creation logic
-						message_type: "SINGLE_CHAT",
+					where: {
+						id: recipientId
 					},
 				});
 
-
-
-				return {
-					status: 200,
-					statusText: "Sent"
+				if (!sender || !recipient) {
+					return {
+						error: "Sender or recipient not found",
+					}
 				}
 
+				conversation = await prisma.conversation.findFirst({
+					where: {
+						AND: [
+							{
+								participants: {
+									some: {
+										id: senderId
+									}
+								}
+							},
+							{
+								participants: {
+									some: {
+										id: recipientId
+									}
+								}
+							}
+						]
+					},
+					include: {
+						participants: true
+					}
+				});
+
+
+				if (!conversation) {
+
+					conversation = await prisma.conversation.create({
+						data: {
+							creatorId: sender.id, // Replace with the actual creator's user ID
+							participants: {
+								connect: [{ id: sender.id }, { id: recipient.id }] // Replace with participant user IDs
+							}
+						},
+						include: {
+							participants: true
+						}
+					});
+
+					if (!conversation) {
+						return {
+							error: "Failed to create conversation"
+						}
+					}
+
+					const message = await prisma.message.create({
+						data: {
+							conversationId: conversation.id,
+							content: content,
+						},
+						include: {
+							conversation: {
+								include: {
+									participants: true
+								}
+							}
+						}
+					})
+
+					if (!message) {
+						return {
+							error: "Failed to send message"
+						}
+					}
+
+					return {
+						statusText: "Message sent!"
+					}
+				}
+
+				else {
+
+					const message = await prisma.message.create({
+						data: {
+							conversationId: conversation.id,
+							content: content,
+						},
+						include: {
+							conversation: {
+								include: {
+									participants: true
+								}
+							}
+						}
+					})
+
+					if (!message) {
+						return {
+							error: "Failed to send message"
+						}
+					}
+
+					return {
+						statusText: "Message sent!"
+					}
+				}
+
+				return {
+					statusText: "Message sent!"
+				}
 
 			} catch (error) {
-				console.error("Error posting message:", error);
-				throw new Error("Failed to post message");
+				console.log(error)
+				return {
+					error: error,
+				}
 			}
+		},
 
-		}
 	},
 
 	// Subscription: {

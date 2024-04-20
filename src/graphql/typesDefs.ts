@@ -6,26 +6,30 @@ export const typeDefs = `#graphql
 	scalar Upload
 	scalar File
 
-
-	input Sender{
-		fname: String
-		lname: String
-	}
-
 	type User {
 		id: ID!
-		first_name: String!
-		last_name: String!
-		middle_name: String!
 		email: String!
-		phone: Int
-		password: String!
+		phone: String
+		first_name: String
+		middle_name: String
+		last_name: String
 		verification_code: String
 		is_active: Boolean
+		is_reported: Boolean
 		is_blocked: Boolean
 		createAt: Date
 		updatedAt: Date
-		participantsId: Int
+		role: String
+	}
+
+	type Conversation {
+		id:  String,
+    title: String,
+    creatorId: String,
+    createdAt: Date,
+    updatedAt: Date,
+    deletedAt: Date,
+    participants: [User]
 	}
 	
 	type AuthResponse {
@@ -48,7 +52,7 @@ export const typeDefs = `#graphql
 	}
 
 	type ChatResponse {
-		status: Int
+		error: String
 		statusText: String
 	}
 
@@ -63,9 +67,7 @@ export const typeDefs = `#graphql
 		): AuthResponse
 
 
-		getMessages(
-			conversationId: String
-		): String
+		getAllUserConversation(userId: String): [Conversation]
 
 
 	}
@@ -84,10 +86,9 @@ export const typeDefs = `#graphql
 		): AuthResponse
 
 		sendMessage(
-			content: String,
-			senderId: String,
-			conversationId: String
-			sender: Sender
+			senderId: String
+			recipientId: String
+			content: String
 			media: [String]
 			files: [File]
 		): ChatResponse 

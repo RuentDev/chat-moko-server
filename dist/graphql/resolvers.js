@@ -9,13 +9,13 @@ const prisma = new PrismaClient();
 const jwt_secret = process.env.JWT_SECRET;
 export const resolvers = {
     Query: {
-        login: async (_parent, args) => {
+        login: async (_, args) => {
             try {
-                if (!jwt_secret)
+                if (!jwt_secret) {
                     return {
-                        user: undefined,
-                        statusText: "Please set JWT_SECRET in .env file"
+                        error: "Please set JWT_SECRET in .env file"
                     };
+                }
                 const { username, password } = args;
                 const userEmailExist = await prisma.user.findUnique({
                     where: {
@@ -43,7 +43,6 @@ export const resolvers = {
                                 is_blocked: userEmailExist.is_blocked,
                                 createAt: userEmailExist.createdAt,
                                 updatedAt: userEmailExist.updatedAt,
-                                participantsId: userEmailExist.participantsId,
                             }
                         }, jwt_secret, { expiresIn: '30d' });
                         return {
@@ -66,14 +65,21 @@ export const resolvers = {
                 };
             }
         },
-        getMessages: async (_parent, args) => {
-            const data = await prisma.conversation.findMany();
-            console.log(data);
-            return "test";
+        getAllUserConversation: async (_, args) => {
+            const conversations = await prisma.conversation.findMany({
+                where: {
+                    creatorId: args.userId
+                },
+                include: {
+                    participants: true
+                }
+            });
+            console.log(conversations);
+            return conversations;
         }
     },
     Mutation: {
-        registerUser: async (parent, args) => {
+        registerUser: async (_, args) => {
             try {
                 if (!jwt_secret)
                     return {
@@ -116,7 +122,6 @@ export const resolvers = {
                         is_blocked: createRes.is_blocked,
                         createAt: createRes.createdAt,
                         updatedAt: createRes.updatedAt,
-                        participantsId: createRes.participantsId,
                     }
                 }, jwt_secret, { expiresIn: '1d' });
                 return {
@@ -125,41 +130,127 @@ export const resolvers = {
                 };
             }
             catch (error) {
+                console.log(error);
                 return {
                     error: error,
                     user: undefined
                 };
             }
         },
-        sendMessage: async (_parent, { senderId, recipientId, message }) => {
+        sendMessage: async (_parent, { senderId, recipientId, content }) => {
             try {
+                let conversation = undefined;
                 const sender = await prisma.user.findUnique({
-                    where: { id: senderId },
+                    where: {
+                        id: senderId
+                    }
                 });
                 const recipient = await prisma.user.findUnique({
-                    where: { id: recipientId },
-                });
-                if (!sender || !recipient) {
-                    throw new Error('Sender or recipient not found');
-                }
-                const newMessage = await prisma.message.create({
-                    data: {
-                        sender_id: senderId,
-                        message,
-                        conversation_id: 0,
-                        message_type: "SINGLE_CHAT",
+                    where: {
+                        id: recipientId
                     },
                 });
+                if (!sender || !recipient) {
+                    return {
+                        error: "Sender or recipient not found",
+                    };
+                }
+                conversation = await prisma.conversation.findFirst({
+                    where: {
+                        AND: [
+                            {
+                                participants: {
+                                    some: {
+                                        id: senderId
+                                    }
+                                }
+                            },
+                            {
+                                participants: {
+                                    some: {
+                                        id: recipientId
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    include: {
+                        participants: true
+                    }
+                });
+                if (!conversation) {
+                    conversation = await prisma.conversation.create({
+                        data: {
+                            creatorId: sender.id,
+                            participants: {
+                                connect: [{ id: sender.id }, { id: recipient.id }]
+                            }
+                        },
+                        include: {
+                            participants: true
+                        }
+                    });
+                    if (!conversation) {
+                        return {
+                            error: "Failed to create conversation"
+                        };
+                    }
+                    const message = await prisma.message.create({
+                        data: {
+                            conversationId: conversation.id,
+                            content: content,
+                        },
+                        include: {
+                            conversation: {
+                                include: {
+                                    participants: true
+                                }
+                            }
+                        }
+                    });
+                    if (!message) {
+                        return {
+                            error: "Failed to send message"
+                        };
+                    }
+                    return {
+                        statusText: "Message sent!"
+                    };
+                }
+                else {
+                    const message = await prisma.message.create({
+                        data: {
+                            conversationId: conversation.id,
+                            content: content,
+                        },
+                        include: {
+                            conversation: {
+                                include: {
+                                    participants: true
+                                }
+                            }
+                        }
+                    });
+                    if (!message) {
+                        return {
+                            error: "Failed to send message"
+                        };
+                    }
+                    return {
+                        statusText: "Message sent!"
+                    };
+                }
                 return {
-                    status: 200,
-                    statusText: "Sent"
+                    statusText: "Message sent!"
                 };
             }
             catch (error) {
-                console.error("Error posting message:", error);
-                throw new Error("Failed to post message");
+                console.log(error);
+                return {
+                    error: error,
+                };
             }
-        }
+        },
     },
 };
 //# sourceMappingURL=resolvers.js.map
