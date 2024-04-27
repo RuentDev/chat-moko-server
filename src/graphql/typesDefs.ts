@@ -6,6 +6,40 @@ export const typeDefs = `#graphql
 	scalar Upload
 	scalar File
 
+	enum MessageType {
+		SINGLE_CHAT
+		GROUP_CHAT
+	}
+
+	type Conversation {
+		id:  String,
+    title: String,
+    creatorId: String,
+    createdAt: Date,
+    updatedAt: Date,
+    deletedAt: Date,
+    participants: [User]
+		messages: [Message]
+	}
+
+	type Message {
+		id: String
+		senderId: String
+		type: MessageType
+		content: String
+		attachment_thumb_url: String
+		attachment_url: String
+		createdAt: Date
+		updatedAt: Date
+		deletedAt: Date
+	}
+	
+	type AuthResponse {
+		user: String
+		statusText: String
+		error: String
+	}
+
 	type User {
 		id: ID!
 		email: String!
@@ -22,34 +56,7 @@ export const typeDefs = `#graphql
 		role: String
 	}
 
-	type Conversation {
-		id:  String,
-    title: String,
-    creatorId: String,
-    createdAt: Date,
-    updatedAt: Date,
-    deletedAt: Date,
-    participants: [User]
-	}
-	
-	type AuthResponse {
-		user: String
-		statusText: String
-		error: String
-	}
 
-
-
-	type Message{
-		id: ID!
-		user: User!
-		content: String!
-		media: [File]
-		files: [File]
-		createdAt: Date
-		updatedAt: Date
-
-	}
 
 	type ChatResponse {
 		error: String
@@ -68,6 +75,8 @@ export const typeDefs = `#graphql
 
 
 		getAllUserConversation(userId: String): [Conversation]
+
+		getAllConversationMessages(conversationId: String): [Message]
 
 
 	}
@@ -93,16 +102,19 @@ export const typeDefs = `#graphql
 			files: [File]
 		): ChatResponse 
 
-
+		createPost(author: String, comment: String): String
 	}
 
-	# type Subscription{
-	# 	heartBeat(
-	# 		visitorsIP:String,
-	# 		sku:String,
-	# 		browser:String,
-	# 		os:String,
-	# 		type:String
-	# 	): Response
-	# }
+	type Subscription{
+		# heartBeat(
+		# 	visitorsIP:String,
+		# 	sku:String,
+		# 	browser:String,
+		# 	os:String,
+		# 	type:String
+		# ): Response
+
+		messages: String
+		postCreated: String
+	}
 `;

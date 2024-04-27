@@ -44,12 +44,14 @@ model Conversation {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime?
   deletedAt    DateTime?
+  isPinned     Boolean?
   participants User[]
   messages     Message[]
 }
 
 model Message {
   id                   String        @id @default(uuid()) @map("_id")
+  senderId             String
   type                 MessageType   @default(SINGLE_CHAT) // Message type
   content              String
   attachment_thumb_url String? // Thumbnail URL for attachments (optional)
@@ -57,6 +59,7 @@ model Message {
   createdAt            DateTime      @default(now())
   updatedAt            DateTime?
   deletedAt            DateTime?
+  isRead               Boolean?
   conversation         Conversation? @relation(fields: [conversationId], references: [id])
   conversationId       String?
 }

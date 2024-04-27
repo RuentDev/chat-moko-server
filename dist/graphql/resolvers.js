@@ -1,10 +1,10 @@
-import bcrypt from "bcrypt";
-import jwt from 'jsonwebtoken';
-import { PubSub } from 'graphql-subscriptions';
+import { PubSub } from "graphql-subscriptions";
 import { PrismaClient } from "@prisma/client";
 import { config } from 'dotenv';
+import jwt from 'jsonwebtoken';
+import bcrypt from "bcrypt";
 config();
-const pubsub = new PubSub();
+export const pubsub = new PubSub();
 const prisma = new PrismaClient();
 const jwt_secret = process.env.JWT_SECRET;
 export const resolvers = {
@@ -68,14 +68,35 @@ export const resolvers = {
         getAllUserConversation: async (_, args) => {
             const conversations = await prisma.conversation.findMany({
                 where: {
-                    creatorId: args.userId
+                    participants: {
+                        some: {
+                            id: args.userId
+                        }
+                    }
                 },
                 include: {
-                    participants: true
+                    participants: true,
+                    messages: true,
                 }
             });
-            console.log(conversations);
             return conversations;
+        },
+        getAllConversationMessages: async (_, args) => {
+            try {
+                const { conversationId } = args;
+                const messages = await prisma.message.findMany({
+                    where: {
+                        conversationId: conversationId
+                    }
+                });
+                return messages;
+            }
+            catch (error) {
+                console.log(error);
+                return {
+                    error: error
+                };
+            }
         }
     },
     Mutation: {
@@ -137,8 +158,9 @@ export const resolvers = {
                 };
             }
         },
-        sendMessage: async (_parent, { senderId, recipientId, content }) => {
+        sendMessage: async (_parent, args) => {
             try {
+                const { senderId, recipientId, content } = args;
                 let conversation = undefined;
                 const sender = await prisma.user.findUnique({
                     where: {
@@ -197,8 +219,9 @@ export const resolvers = {
                     }
                     const message = await prisma.message.create({
                         data: {
-                            conversationId: conversation.id,
+                            senderId: sender.id,
                             content: content,
+                            conversationId: conversation.id,
                         },
                         include: {
                             conversation: {
@@ -213,6 +236,7 @@ export const resolvers = {
                             error: "Failed to send message"
                         };
                     }
+                    pubsub.publish('MESSAGES', { messages: args });
                     return {
                         statusText: "Message sent!"
                     };
@@ -220,8 +244,9 @@ export const resolvers = {
                 else {
                     const message = await prisma.message.create({
                         data: {
-                            conversationId: conversation.id,
+                            senderId: sender.id,
                             content: content,
+                            conversationId: conversation.id,
                         },
                         include: {
                             conversation: {
@@ -236,13 +261,11 @@ export const resolvers = {
                             error: "Failed to send message"
                         };
                     }
+                    pubsub.publish('MESSAGES', { messages: args });
                     return {
                         statusText: "Message sent!"
                     };
                 }
-                return {
-                    statusText: "Message sent!"
-                };
             }
             catch (error) {
                 console.log(error);
@@ -251,6 +274,21 @@ export const resolvers = {
                 };
             }
         },
+        createPost(_, args, { postController }) {
+            pubsub.publish('POST_CREATED', { postCreated: args });
+            return postController.createPost(args);
+        },
     },
+    Subscription: {
+        messages: {
+            subscribe: (_parent, args, context) => {
+                console.log(_parent, args, context);
+                return pubsub.asyncIterator(['MESSAGES']);
+            }
+        },
+        postCreated: {
+            subscribe: () => pubsub.asyncIterator(['POST_CREATED']),
+        },
+    }
 };
 //# sourceMappingURL=resolvers.js.map

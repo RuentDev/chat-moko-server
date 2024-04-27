@@ -1,18 +1,15 @@
-import bcrypt from "bcrypt";
-import jwt from 'jsonwebtoken'
-import { PubSub } from 'graphql-subscriptions';
+import { PubSub } from "graphql-subscriptions";
 import { PrismaClient } from "@prisma/client";
-import { subscribe } from "diagnostics_channel";
-import { error } from "console";
 import { config } from 'dotenv';
+import jwt from 'jsonwebtoken'
+import bcrypt from "bcrypt";
+
 
 
 config();
 
-const pubsub = new PubSub();
+export const pubsub = new PubSub()
 const prisma = new PrismaClient();
-
-
 
 const jwt_secret = process.env.JWT_SECRET
 
@@ -92,16 +89,41 @@ export const resolvers = {
 			// find all conversation of the user
 			const conversations = await prisma.conversation.findMany({
 				where: {
-					creatorId: args.userId
+					participants: {
+						some: {
+							id: args.userId
+						}
+					}
 				},
 				include: {
-					participants: true
+					participants: true,
+					messages: true,
 				}
 			})
 
-			console.log(conversations)
-
 			return conversations
+		},
+
+		getAllConversationMessages: async (_: any, args: {conversationId: string}) => {
+			try {
+				
+				const { conversationId } = args
+
+				const messages = await prisma.message.findMany({
+					where: {
+						conversationId: conversationId
+					}
+				})
+
+				
+				return messages
+
+			} catch (error) {
+				console.log(error)
+				return {
+					error: error
+				}
+			}
 		}
 
 	},
@@ -173,8 +195,11 @@ export const resolvers = {
 				}
 			}
 		},
-		sendMessage: async (_parent: any, { senderId, recipientId, content }: { senderId: string, recipientId: string, content: string }) => {
+
+		sendMessage: async (_parent: any, args: { senderId: string, recipientId: string, content: string } ) => {
 			try {
+
+				const { senderId, recipientId, content } = args
 
 				let conversation = undefined
 
@@ -243,8 +268,9 @@ export const resolvers = {
 
 					const message = await prisma.message.create({
 						data: {
-							conversationId: conversation.id,
+							senderId: sender.id,
 							content: content,
+							conversationId: conversation.id,
 						},
 						include: {
 							conversation: {
@@ -259,7 +285,9 @@ export const resolvers = {
 						return {
 							error: "Failed to send message"
 						}
-					}
+					}	
+
+					pubsub.publish('MESSAGES', { messages: args }); 
 
 					return {
 						statusText: "Message sent!"
@@ -270,8 +298,9 @@ export const resolvers = {
 
 					const message = await prisma.message.create({
 						data: {
-							conversationId: conversation.id,
+							senderId: sender.id,
 							content: content,
+							conversationId: conversation.id,
 						},
 						include: {
 							conversation: {
@@ -288,13 +317,11 @@ export const resolvers = {
 						}
 					}
 
+					pubsub.publish('MESSAGES', { messages: args });
+
 					return {
 						statusText: "Message sent!"
 					}
-				}
-
-				return {
-					statusText: "Message sent!"
 				}
 
 			} catch (error) {
@@ -305,15 +332,34 @@ export const resolvers = {
 			}
 		},
 
+		createPost(_: any, args: any, { postController }: any) {
+      // Datastore logic lives in postController
+			pubsub.publish('POST_CREATED', { postCreated: args }); 
+      return postController.createPost(args);
+    },
 	},
 
-	// Subscription: {
-	// 	heartBeat: {
-	// 		subscribe: async (_parent: any, args: any, context: any) => {
-	// 			console.log(_parent, args, await context);
-	// 			return pubsub.asyncIterator(['HEART_BEAT']);
-	// 		}
-	// 	}
-	// }
+	Subscription: {
+
+		// heartBeat: {
+		// 	subscribe: async (_parent: any, args: any, context: any) => {
+		// 		console.log(_parent, args, await context);
+		// 		return pubsub.asyncIterator(['HEART_BEAT']);
+		// 	}
+		// },
+
+		messages: {
+			subscribe: (_parent: any, args: any, context: any) => {
+				console.log(_parent, args, context)
+				return  pubsub.asyncIterator(['MESSAGES'])
+			}
+		},
+
+		postCreated: {
+      // More on pubsub below
+      subscribe: () => pubsub.asyncIterator(['POST_CREATED']),
+    },
+		
+	}
 
 };
