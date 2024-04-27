@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE `Message` MODIFY `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    MODIFY `attachement_url` VARCHAR(191) NULL;
