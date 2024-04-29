@@ -1,1 +1,1 @@
-{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../src/graphql/typeDefs/index.ts"],"names":[],"mappings":";;;;;AAAA,kEAAyC;AACzC,kFAAyD;AAEzD,MAAM,QAAQ,GAAG,CAAC,sBAAY,EAAE,8BAAoB,CAAC,CAAA;AAErD,kBAAe,QAAQ,CAAC"}
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../src/graphql/typeDefs/index.ts"],"names":[],"mappings":";;;;;AAAA,kEAAyC;AACzC,kFAAyD;AACzD,wEAA+C;AAE/C,MAAM,QAAQ,GAAG,CAAC,sBAAY,EAAE,8BAAoB,EAAE,yBAAe,CAAC,CAAA;AAEtE,kBAAe,QAAQ,CAAC"}

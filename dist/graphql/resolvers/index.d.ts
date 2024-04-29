@@ -36,8 +36,14 @@ declare const resolvers: {
 } & {
     Query: {
         getConversation: (_: any, args: {
-            userId: string;
+            userId: any;
         }, context: import("../../util/types").GraphQLContext) => Promise<({
+            participants: {
+                id: string;
+                userId: string;
+                conversationId: string;
+                hasSeenLatestMessage: boolean;
+            }[];
             messages: {
                 id: string;
                 senderId: string;
@@ -51,23 +57,6 @@ declare const resolvers: {
                 isRead: boolean | null;
                 conversationId: string | null;
             }[];
-            participants: {
-                id: string;
-                email: string;
-                phone: string;
-                password: string | null;
-                first_name: string | null;
-                middle_name: string | null;
-                last_name: string | null;
-                verification_code: string | null;
-                is_active: boolean;
-                is_reported: boolean;
-                is_blocked: boolean;
-                createdAt: Date;
-                updatedAt: Date | null;
-                role: import(".prisma/client").$Enums.Role;
-                conversationId: string | null;
-            }[];
         } & {
             id: string;
             title: string | null;
@@ -77,6 +66,9 @@ declare const resolvers: {
             deletedAt: Date | null;
             isPinned: boolean | null;
         })[]>;
+    };
+} & {
+    Query: {
         getMessages: (_: any, args: {
             conversationId: string;
         }, context: import("../../util/types").GraphQLContext) => Promise<{
@@ -97,6 +89,7 @@ declare const resolvers: {
     };
     Mutation: {
         sendMessage: (_: any, args: {
+            conversationId: string;
             senderId: string;
             recipientId: string;
             content: string;
