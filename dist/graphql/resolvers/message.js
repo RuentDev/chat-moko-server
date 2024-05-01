@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const graphql_1 = require("graphql");
 // export const pubsub = new PubSub()
 // const prisma = new PrismaClient();
 const jwt_secret = process.env.JWT_SECRET;
@@ -38,7 +39,7 @@ const resolvers = {
             try {
                 const { session, prisma, pubsub } = context;
                 const { conversationId, senderId, recipientId, content } = args;
-                let conversation = undefined;
+                let userConversation = null;
                 // if (!session?.user) {
                 //   throw new GraphQLError("Not authorized");
                 // }
@@ -57,119 +58,150 @@ const resolvers = {
                         error: "Sender or recipient not found",
                     };
                 }
-                conversation = yield prisma.conversation.findFirst({
-                    where: {
-                        AND: [
-                            // { id: args.conversationId },
-                            {
-                                participants: {
-                                    every: {
-                                        userId: {
-                                            in: [senderId, recipientId]
+                if (conversationId) {
+                    userConversation = yield prisma.conversation.findFirst({
+                        where: {
+                            id: conversationId,
+                            AND: [
+                                {
+                                    participants: {
+                                        some: {
+                                            userId: sender.id
+                                        }
+                                    }
+                                },
+                                {
+                                    participants: {
+                                        some: {
+                                            userId: recipient.id
                                         }
                                     }
                                 }
-                            }
-                        ]
-                    },
-                    include: {
-                        participants: true,
-                        messages: true
+                            ]
+                        },
+                        include: {
+                            participants: true,
+                            messages: true
+                        }
+                    });
+                    if (!userConversation) {
+                        return new graphql_1.GraphQLError("Conversation ID was detected but it not existing to database");
                     }
-                });
-                console.log("CONVERSATION", conversation);
-                // if (!conversation) {
-                // conversation = await prisma.conversation.create({
-                //   data: {
-                //     creatorId: sender.id
-                //   },
-                //   include: {
-                //     participants: true,
-                //     messages: true
-                //   }
-                // });
-                // if (!conversation) {
-                //   return {
-                //     error: "Failed to create conversation"
-                //   }
-                // }
-                // const conversationParticipants = await prisma.conversationParticipant.createMany({
-                //   data: [
-                //     {
-                //       conversationId: conversation.id,
-                //       userId: sender.id,
-                //       hasSeenLatestMessage: false,
-                //     },
-                //     {
-                //       conversationId: conversation.id,
-                //       userId: recipient.id,
-                //       hasSeenLatestMessage: false,
-                //     },
-                //   ]
-                // })
-                // if (!conversationParticipants) {
-                //   return {
-                //     error: "Failed to create conversation participants"
-                //   }
-                // }
-                // const message = await prisma.message.create({
-                //   data: {
-                //     senderId: sender.id,
-                //     content: content,
-                //     conversation: {
-                //       connect: {
-                //         id: conversation.id
-                //       }
-                //     }
-                //   },
-                //   include: {
-                //     conversation: {
-                //       include: {
-                //         participants: true
-                //       }
-                //     }
-                //   }
-                // })
-                // if (!message) {
-                //   return {
-                //     error: "Failed to send message"
-                //   }
-                // }
-                // pubsub.publish('MESSAGES_SENT', {});
-                return {
-                    statusText: "Message sent!"
-                };
-                // }
-                // else {
-                //   console.log("existing", conversation)
-                //   // const message = await prisma.message.create({
-                //   //   data: {
-                //   //     senderId: sender.id,
-                //   //     content: content,
-                //   //     conversation: {
-                //   //       connect: {
-                //   //         id: conversation.id
-                //   //       }
-                //   //     }
-                //   //   },
-                //   //   include: {
-                //   //     conversation: {
-                //   //       include: {
-                //   //         participants: true
-                //   //       }
-                //   //     }
-                //   //   }
-                //   // })
-                //   // if (!message) {
-                //   //   return {
-                //   //     error: "Failed to send message"
-                //   //   }
-                //   // }
-                //   // pubsub.publish('MESSAGES', { messages: args });
-                //   return {
-                //     statusText: "Message sent!"
-                //   }
-                // }
+                }
+                else {
+                    userConversation = yield prisma.conversation.findFirst({
+                        where: {
+                            AND: [
+                                {
+                                    participants: {
+                                        some: {
+                                            userId: sender.id
+                                        }
+                                    }
+                                },
+                                {
+                                    participants: {
+                                        some: {
+                                            userId: recipient.id
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        include: {
+                            participants: true,
+                            messages: true
+                        }
+                    });
+                }
+                if (!userConversation) {
+                    console.log("sent without conversation");
+                    userConversation = yield prisma.conversation.create({
+                        data: {
+                            creatorId: sender.id
+                        },
+                        include: {
+                            participants: true,
+                            messages: true
+                        }
+                    });
+                    if (!userConversation) {
+                        return {
+                            error: "Failed to create conversation"
+                        };
+                    }
+                    const conversationParticipants = yield prisma.conversationParticipant.createMany({
+                        data: [
+                            {
+                                conversationId: userConversation.id,
+                                userId: sender.id,
+                                hasSeenLatestMessage: false,
+                            },
+                            {
+                                conversationId: userConversation.id,
+                                userId: recipient.id,
+                                hasSeenLatestMessage: false,
+                            },
+                        ]
+                    });
+                    if (!conversationParticipants) {
+                        return {
+                            error: "Failed to create conversation participants"
+                        };
+                    }
+                    const message = yield prisma.message.create({
+                        data: {
+                            senderId: sender.id,
+                            content: content,
+                            conversation: {
+                                connect: {
+                                    id: userConversation.id
+                                }
+                            }
+                        },
+                        include: {
+                            conversation: {
+                                include: {
+                                    participants: true
+                                }
+                            }
+                        }
+                    });
+                    if (!message) {
+                        return {
+                            error: "Failed to send message"
+                        };
+                    }
+                    return {
+                        statusText: "Message sent!"
+                    };
+                }
+                else {
+                    console.log("sent with conversation");
+                    const message = yield prisma.message.create({
+                        data: {
+                            senderId: sender.id,
+                            content: content,
+                            conversationId: userConversation.id
+                        },
+                        include: {
+                            conversation: {
+                                include: {
+                                    participants: true
+                                }
+                            }
+                        }
+                    });
+                    if (!message) {
+                        return {
+                            error: "Failed to send message"
+                        };
+                    }
+                    // pubsub.publish('MESSAGES', { messages: args });
+                    return {
+                        statusText: "Message sent!"
+                    };
+                }
             }
             catch (error) {
                 console.log(error);

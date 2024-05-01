@@ -22,24 +22,6 @@ const resolvers = {
                     participants: {
                         some: {
                             userId: args.userId,
-                            // conversationId: {
-                            //   in: [
-                            //     // Subquery to find conversations where user are participants
-                            //     // Get conversation IDs where sender is a participant
-                            //     ...(await prisma.conversationParticipant.findMany({
-                            //       where: {
-                            //         conversation: {
-                            //           participants: {
-                            //             some: {
-                            //               conversationId: { in: [args.userId] },
-                            //             }
-                            //           }
-                            //         }
-                            //       },
-                            //       select: { conversationId: true }
-                            //     })).map(participant => participant.conversationId)
-                            //   ]
-                            // }
                         }
                     }
                 },

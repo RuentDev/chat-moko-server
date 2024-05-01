@@ -1,4 +1,5 @@
 import { GraphQLContext } from "../../util/types";
+import { GraphQLError } from "graphql";
 declare const resolvers: {
     Query: {
         getMessages: (_: any, args: {
@@ -25,7 +26,7 @@ declare const resolvers: {
             senderId: string;
             recipientId: string;
             content: string;
-        }, context: GraphQLContext) => Promise<{
+        }, context: GraphQLContext) => Promise<GraphQLError | {
             statusText: string;
             error?: undefined;
         } | {

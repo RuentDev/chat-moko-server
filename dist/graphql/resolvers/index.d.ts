@@ -93,7 +93,7 @@ declare const resolvers: {
             senderId: string;
             recipientId: string;
             content: string;
-        }, context: import("../../util/types").GraphQLContext) => Promise<{
+        }, context: import("../../util/types").GraphQLContext) => Promise<import("graphql").GraphQLError | {
             statusText: string;
             error?: undefined;
         } | {

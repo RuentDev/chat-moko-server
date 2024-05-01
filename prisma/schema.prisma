@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
+  url      = env("CHATMOKO_URI")
 }
 
 enum Role {
@@ -16,6 +16,25 @@ enum Role {
 enum MessageType {
   SINGLE_CHAT
   GROUP_CHAT
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
 }
 
 model User {
@@ -34,6 +53,7 @@ model User {
   updatedAt         DateTime?
   role              Role                      @default(USER) // User role
   conversations     ConversationParticipant[]
+  account           Account[]
 }
 
 model ConversationParticipant {
