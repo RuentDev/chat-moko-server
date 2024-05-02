@@ -36,6 +36,16 @@ const typeDefs = gql`
   }
 
   type Mutation {
+
+    createUserAccount(
+      phone: String,
+			password: String
+			firstName: String,
+			middleName: String,
+			lastName: String,
+    ): AuthResponse
+
+
     registerUser(
 			email: String,
 			phone: String,

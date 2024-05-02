@@ -37,6 +37,16 @@ const typeDefs = (0, apollo_server_1.gql) `
   }
 
   type Mutation {
+
+    createUserAccount(
+      phone: String,
+			password: String
+			firstName: String,
+			middleName: String,
+			lastName: String,
+    ): AuthResponse
+
+
     registerUser(
 			email: String,
 			phone: String,

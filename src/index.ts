@@ -14,10 +14,12 @@ import jwt from 'jsonwebtoken';
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
-// import { getSession } from "next-auth/react";
-config();
+import { getServerSession } from './util/index';
 
 async function init() {
+  config();
+
+
   const PORT = 4000;
   const app = express();
   const httpServer = http.createServer(app);
@@ -26,6 +28,7 @@ async function init() {
   const prisma = new PrismaClient();
 
   const jwt_secret = process.env.JWT_SECRET
+
 
   // Creating the WebSocket server
   const wsServer = new WebSocketServer({
@@ -38,9 +41,7 @@ async function init() {
 
   const schema = makeExecutableSchema({ typeDefs, resolvers })
 
-  const getSubscriptionContext = async (
-    ctx: SubscriptionContext
-  ): Promise<GraphQLContext> => {
+  const getSubscriptionContext = async ( ctx: SubscriptionContext): Promise<GraphQLContext> => {
     ctx;
     // ctx is the graphql-ws Context where connectionParams live
     if (ctx.connectionParams && ctx.connectionParams.session) {
@@ -69,6 +70,7 @@ async function init() {
   const server = new ApolloServer({
     schema,
     csrfPrevention: true,
+    
     plugins: [
       // Proper shutdown for the HTTP server.
       ApolloServerPluginDrainHttpServer({ httpServer }),
@@ -99,9 +101,7 @@ async function init() {
     express.json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
-
-        let session: any;
-
+        const session = await getServerSession(req.headers.cookie)
         return { session: session as Session, prisma, pubsub };
       },
     }),

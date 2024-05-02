@@ -31,7 +31,8 @@ export interface SubscriptionContext extends Context {
  */
 export interface User {
   id: string;
-  username: string;
+  name:  string;
+  email: string;
 }
 
 export interface CreateUsernameResponse {

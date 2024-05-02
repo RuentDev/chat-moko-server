@@ -40,17 +40,18 @@ model Account {
 model User {
   id                String                    @id @default(uuid()) @map("_id")
   email             String                    @unique
-  phone             String
+  phone             String?
   password          String?
   first_name        String?
   middle_name       String?
   last_name         String?
+  emailVerified     DateTime?
   verification_code String?
   is_active         Boolean                   @default(false)
   is_reported       Boolean                   @default(false)
   is_blocked        Boolean                   @default(false)
   createdAt         DateTime                  @default(now())
-  updatedAt         DateTime?
+  updatedAt         DateTime?                 @updatedAt
   role              Role                      @default(USER) // User role
   conversations     ConversationParticipant[]
   account           Account[]
@@ -70,7 +71,7 @@ model Conversation {
   title        String? // Title of the conversation (optional)
   creatorId    String // ID of the conversation creator
   createdAt    DateTime                  @default(now())
-  updatedAt    DateTime?
+  updatedAt    DateTime?                 @updatedAt
   deletedAt    DateTime?
   isPinned     Boolean?
   participants ConversationParticipant[]
@@ -85,7 +86,7 @@ model Message {
   attachment_thumb_url String? // Thumbnail URL for attachments (optional)
   attachment_url       String? // Attachment URL (optional)
   createdAt            DateTime      @default(now())
-  updatedAt            DateTime?
+  updatedAt            DateTime?     @updatedAt
   deletedAt            DateTime?
   isRead               Boolean?
   conversation         Conversation? @relation(fields: [conversationId], references: [id])

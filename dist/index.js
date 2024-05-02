@@ -26,10 +26,10 @@ const dotenv_1 = require("dotenv");
 const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const cors_1 = __importDefault(require("cors"));
-// import { getSession } from "next-auth/react";
-(0, dotenv_1.config)();
+const index_1 = require("./util/index");
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
+        (0, dotenv_1.config)();
         const PORT = 4000;
         const app = (0, express_1.default)();
         const httpServer = http_1.default.createServer(app);
@@ -95,7 +95,7 @@ function init() {
         };
         app.use('/graphql', (0, cors_1.default)(corsOptions), express_1.default.json(), (0, express4_1.expressMiddleware)(server, {
             context: (_a) => __awaiter(this, [_a], void 0, function* ({ req }) {
-                let session;
+                const session = yield (0, index_1.getServerSession)(req.headers.cookie);
                 return { session: session, prisma, pubsub };
             }),
         }));

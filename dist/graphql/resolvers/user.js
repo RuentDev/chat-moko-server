@@ -80,6 +80,71 @@ const resolvers = {
         }),
     },
     Mutation: {
+        createUserAccount: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
+            try {
+                const { session, prisma } = context;
+                const { phone, password, firstName, middleName, lastName } = args;
+                if (!session || !session.user) {
+                    return {
+                        error: "Session not available!"
+                    };
+                }
+                if (!jwt_secret)
+                    return {
+                        user: undefined,
+                        statusText: "Please set JWT_SECRET in .env file"
+                    };
+                const userExist = yield prisma.user.findUnique({
+                    where: {
+                        email: session.user.email
+                    }
+                });
+                if (!userExist) {
+                    return {
+                        user: undefined,
+                        statusText: "This user it not registered"
+                    };
+                }
+                const saltRounds = 10;
+                const salt = bcrypt_1.default.genSaltSync(saltRounds);
+                const hashPass = bcrypt_1.default.hashSync(password, salt);
+                const createRes = yield prisma.user.update({
+                    where: {
+                        id: userExist.id,
+                    },
+                    data: {
+                        phone: phone,
+                        password: hashPass,
+                        first_name: firstName,
+                        middle_name: middleName,
+                        last_name: lastName,
+                        emailVerified: new Date(),
+                    }
+                });
+                const token = jsonwebtoken_1.default.sign({
+                    user: {
+                        email: createRes.email,
+                        phone: createRes.phone,
+                        first_name: createRes.first_name,
+                        middle_name: createRes.middle_name,
+                        last_name: createRes.last_name,
+                        is_active: createRes.is_active,
+                        is_blocked: createRes.is_blocked,
+                        createAt: createRes.createdAt,
+                        updatedAt: createRes.updatedAt,
+                    }
+                }, jwt_secret, { expiresIn: '1d' });
+                return {
+                    user: token,
+                    statusText: "Create user success!"
+                };
+            }
+            catch (error) {
+                return {
+                    error: error
+                };
+            }
+        }),
         registerUser: (_, args) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 if (!jwt_secret)
@@ -133,8 +198,7 @@ const resolvers = {
             catch (error) {
                 console.log(error);
                 return {
-                    error: error,
-                    user: undefined
+                    error: error
                 };
             }
         }),
