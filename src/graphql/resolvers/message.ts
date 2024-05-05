@@ -16,15 +16,27 @@ const resolvers = {
 
 
   Query: {
-    getMessages: async (_: any, args: { conversationId: string }, context: GraphQLContext) => {
+    messages: async (_: any, args: { conversationId: string }, context: GraphQLContext) => {
       try {
-        const { session, prisma, pubsub } = context;
+        const { session, prisma } = context;
         const { conversationId } = args
+
+        if(!session?.user){
+          return new GraphQLError("Not authorized")
+        }
 
         const messages = await prisma.message.findMany({
           where: {
             conversationId: conversationId
+          },
+          take: 10,
+          orderBy: {
+            createdAt: "desc"
+          },
+          include: {
+            user: true
           }
+
         })
 
 
@@ -48,9 +60,9 @@ const resolvers = {
         let userConversation: Conversation | null = null
 
 
-        // if (!session?.user) {
-        //   throw new GraphQLError("Not authorized");
-        // }
+        if (!session?.user) {
+          throw new GraphQLError("Not authorized");
+        }
 
 
         const sender = await prisma.user.findUnique({
@@ -172,18 +184,10 @@ const resolvers = {
             data: {
               senderId: sender.id,
               content: content,
-              conversation: {
-                connect: {
-                  id: userConversation.id
-                }
-              }
+              conversationId: userConversation.id
             },
             include: {
-              conversation: {
-                include: {
-                  participants: true
-                }
-              }
+              user: true
             }
           })
 
@@ -192,6 +196,14 @@ const resolvers = {
               error: "Failed to send message"
             }
           }
+
+          pubsub.publish("CONVERSATION_CREATED", {
+            conversation: userConversation
+          })
+
+          pubsub.publish("MESSAGE_SENT", {
+            messageSent: message
+          })
 
           return {
             statusText: "Message sent!"
@@ -207,11 +219,7 @@ const resolvers = {
               conversationId: userConversation.id
             },
             include: {
-              conversation: {
-                include: {
-                  participants: true
-                }
-              }
+              user: true
             }
           })
 
@@ -221,8 +229,10 @@ const resolvers = {
             }
           }
 
+          pubsub.publish("MESSAGE_SENT", {
+            messageSent: message
+          })
 
-          // pubsub.publish('MESSAGES', { messages: args });
           return {
             statusText: "Message sent!"
           }
@@ -239,26 +249,11 @@ const resolvers = {
 
 
   Subscription: {
-    messages: {
-      subscribe: (_parent: any, args: any, context: GraphQLContext) => {
+    messageSent: {
+      subscribe: (_: any, __: any, context: GraphQLContext) => {
         const { pubsub } = context
-
-        return pubsub.asyncIterator(['MESSAGES_SENT'])
+        return pubsub.asyncIterator(['MESSAGE_SENT'])
       }
-      // subscribe: withFilter(
-      //   (_: any, __: any, context: GraphQLContext) => {
-      //     const { pubsub } = context;
-
-      //     return pubsub.asyncIterator(["MESSAGE_SENT"]);
-      //   },
-      //   (
-      //     payload: SendMessageSubscriptionPayload,
-      //     args: { conversationId: string },
-      //     context: GraphQLContext
-      //   ) => {
-      //     return payload.messageSent.conversationId === args.conversationId;
-      //   }
-      // ),
     },
   }
 

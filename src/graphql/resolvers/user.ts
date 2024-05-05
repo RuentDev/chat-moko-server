@@ -14,7 +14,9 @@ const jwt_secret = process.env.JWT_SECRET
 const resolvers = {
 
 
-  Query: {
+  // Query: {},
+
+  Mutation: {
     userLogin: async (_: any, args: any) => {
       try {
 
@@ -82,11 +84,6 @@ const resolvers = {
         }
       }
     },
-
-  },
-
-  Mutation: {
-
     createUserAccount: async (_: any, args: any, context: GraphQLContext) => {
       try {
         const {session, prisma} = context

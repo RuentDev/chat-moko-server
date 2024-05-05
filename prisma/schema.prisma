@@ -45,6 +45,7 @@ model User {
   first_name        String?
   middle_name       String?
   last_name         String?
+  image             String?
   emailVerified     DateTime?
   verification_code String?
   is_active         Boolean                   @default(false)
@@ -55,6 +56,7 @@ model User {
   role              Role                      @default(USER) // User role
   conversations     ConversationParticipant[]
   account           Account[]
+  Message           Message[]
 }
 
 model ConversationParticipant {
@@ -91,4 +93,5 @@ model Message {
   isRead               Boolean?
   conversation         Conversation? @relation(fields: [conversationId], references: [id])
   conversationId       String?
+  user                 User          @relation(fields: [senderId], references: [id])
 }

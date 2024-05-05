@@ -2,7 +2,7 @@ import { PubSub } from "graphql-subscriptions";
 import { GraphQLContext } from "../../util/types";
 export declare const pubsub: PubSub;
 declare const resolvers: {
-    Query: {
+    Mutation: {
         userLogin: (_: any, args: any) => Promise<{
             error: string;
             user?: undefined;
@@ -20,8 +20,6 @@ declare const resolvers: {
             user: undefined;
             statusText?: undefined;
         } | undefined>;
-    };
-    Mutation: {
         createUserAccount: (_: any, args: any, context: GraphQLContext) => Promise<{
             user: undefined;
             statusText: string;

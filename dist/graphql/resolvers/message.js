@@ -15,13 +15,23 @@ const graphql_1 = require("graphql");
 const jwt_secret = process.env.JWT_SECRET;
 const resolvers = {
     Query: {
-        getMessages: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
+        messages: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
             try {
-                const { session, prisma, pubsub } = context;
+                const { session, prisma } = context;
                 const { conversationId } = args;
+                if (!(session === null || session === void 0 ? void 0 : session.user)) {
+                    return new graphql_1.GraphQLError("Not authorized");
+                }
                 const messages = yield prisma.message.findMany({
                     where: {
                         conversationId: conversationId
+                    },
+                    take: 10,
+                    orderBy: {
+                        createdAt: "desc"
+                    },
+                    include: {
+                        user: true
                     }
                 });
                 return messages;
@@ -40,9 +50,9 @@ const resolvers = {
                 const { session, prisma, pubsub } = context;
                 const { conversationId, senderId, recipientId, content } = args;
                 let userConversation = null;
-                // if (!session?.user) {
-                //   throw new GraphQLError("Not authorized");
-                // }
+                if (!(session === null || session === void 0 ? void 0 : session.user)) {
+                    throw new graphql_1.GraphQLError("Not authorized");
+                }
                 const sender = yield prisma.user.findUnique({
                     where: {
                         id: senderId
@@ -153,18 +163,10 @@ const resolvers = {
                         data: {
                             senderId: sender.id,
                             content: content,
-                            conversation: {
-                                connect: {
-                                    id: userConversation.id
-                                }
-                            }
+                            conversationId: userConversation.id
                         },
                         include: {
-                            conversation: {
-                                include: {
-                                    participants: true
-                                }
-                            }
+                            user: true
                         }
                     });
                     if (!message) {
@@ -172,6 +174,12 @@ const resolvers = {
                             error: "Failed to send message"
                         };
                     }
+                    pubsub.publish("CONVERSATION_CREATED", {
+                        conversation: userConversation
+                    });
+                    pubsub.publish("MESSAGE_SENT", {
+                        messageSent: message
+                    });
                     return {
                         statusText: "Message sent!"
                     };
@@ -185,11 +193,7 @@ const resolvers = {
                             conversationId: userConversation.id
                         },
                         include: {
-                            conversation: {
-                                include: {
-                                    participants: true
-                                }
-                            }
+                            user: true
                         }
                     });
                     if (!message) {
@@ -197,7 +201,9 @@ const resolvers = {
                             error: "Failed to send message"
                         };
                     }
-                    // pubsub.publish('MESSAGES', { messages: args });
+                    pubsub.publish("MESSAGE_SENT", {
+                        messageSent: message
+                    });
                     return {
                         statusText: "Message sent!"
                     };
@@ -212,24 +218,11 @@ const resolvers = {
         }),
     },
     Subscription: {
-        messages: {
-            subscribe: (_parent, args, context) => {
+        messageSent: {
+            subscribe: (_, __, context) => {
                 const { pubsub } = context;
-                return pubsub.asyncIterator(['MESSAGES_SENT']);
+                return pubsub.asyncIterator(['MESSAGE_SENT']);
             }
-            // subscribe: withFilter(
-            //   (_: any, __: any, context: GraphQLContext) => {
-            //     const { pubsub } = context;
-            //     return pubsub.asyncIterator(["MESSAGE_SENT"]);
-            //   },
-            //   (
-            //     payload: SendMessageSubscriptionPayload,
-            //     args: { conversationId: string },
-            //     context: GraphQLContext
-            //   ) => {
-            //     return payload.messageSent.conversationId === args.conversationId;
-            //   }
-            // ),
         },
     }
 };

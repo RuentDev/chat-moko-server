@@ -2,8 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const apollo_server_1 = require("apollo-server");
 const typeDefs = (0, apollo_server_1.gql) `
-
-
   scalar Date
   scalar Upload
   scalar File
@@ -21,6 +19,7 @@ const typeDefs = (0, apollo_server_1.gql) `
   type Message {
 		id: String
 		senderId: String
+		user: User
 		type: MessageType
 		content: String
 		attachment_thumb_url: String
@@ -28,10 +27,11 @@ const typeDefs = (0, apollo_server_1.gql) `
 		createdAt: Date
 		updatedAt: Date
 		deletedAt: Date
+		conversationId: String
 	}
 
   type Query {
-    getMessages(conversationId: String): [Message]
+    messages(conversationId: String): [Message]
   }
 
   type Mutation {
@@ -47,7 +47,7 @@ const typeDefs = (0, apollo_server_1.gql) `
 
 
   type Subscription{
-		messages(conversationId: String): [Message]
+		messageSent: Message
 	}
 
 `;

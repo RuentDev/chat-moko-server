@@ -3,9 +3,10 @@ import { PubSub } from "graphql-subscriptions";
 import { Context } from "graphql-ws/lib/server";
 /**
  * Server Configuration
- */
+*/
 export interface Session {
     user?: User;
+    expires: string;
 }
 export interface GraphQLContext {
     session: Session | null;

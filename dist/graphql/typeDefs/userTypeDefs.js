@@ -18,6 +18,7 @@ const typeDefs = (0, apollo_server_1.gql) `
     id: ID!
     email: String!
     phone: String
+    image: String
     first_name: String
     middle_name: String
     last_name: String
@@ -30,13 +31,11 @@ const typeDefs = (0, apollo_server_1.gql) `
     role: String
   }
 
-  type Query {
-    getUsers(email: String): [User]
-  
-		userLogin(username: String, password: String): AuthResponse
-  }
+  # type Query {}
 
   type Mutation {
+
+		userLogin(username: String, password: String): AuthResponse
 
     createUserAccount(
       phone: String,

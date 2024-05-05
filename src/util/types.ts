@@ -9,9 +9,10 @@ import messagePopulated from "../graphql/resolvers/conversation";
 
 /**
  * Server Configuration
- */
+*/
 export interface Session {
   user?: User;
+  expires: string
 }
 
 export interface GraphQLContext {

@@ -21,7 +21,8 @@ exports.pubsub = new graphql_subscriptions_1.PubSub();
 const prisma = new client_1.PrismaClient();
 const jwt_secret = process.env.JWT_SECRET;
 const resolvers = {
-    Query: {
+    // Query: {},
+    Mutation: {
         userLogin: (_, args) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 if (!jwt_secret) {
@@ -78,8 +79,6 @@ const resolvers = {
                 };
             }
         }),
-    },
-    Mutation: {
         createUserAccount: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 const { session, prisma } = context;

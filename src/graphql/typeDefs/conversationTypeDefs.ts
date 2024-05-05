@@ -13,6 +13,7 @@ const typeDefs = gql`
     hasSeenLatestMessage: Boolean
     userId: String
     conversationId: String
+    user: User
   }
 
   type Conversation {
@@ -23,6 +24,7 @@ const typeDefs = gql`
     updatedAt: Date,
     deletedAt: Date,
     participants: [ConversationParticipant]
+    messages: [Message]
 	}
 
 
@@ -33,7 +35,9 @@ const typeDefs = gql`
   # type Mutation {}
 
 
-  # type Subscription{}
+  type Subscription{
+    convesations(conversationId: String): [Conversation]
+  }
 
 `
 

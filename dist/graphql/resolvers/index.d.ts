@@ -1,5 +1,5 @@
 declare const resolvers: {
-    Query: {
+    Mutation: {
         userLogin: (_: any, args: any) => Promise<{
             error: string;
             user?: undefined;
@@ -17,8 +17,6 @@ declare const resolvers: {
             user: undefined;
             statusText?: undefined;
         } | undefined>;
-    };
-    Mutation: {
         createUserAccount: (_: any, args: any, context: import("../../util/types").GraphQLContext) => Promise<{
             user: undefined;
             statusText: string;
@@ -51,12 +49,31 @@ declare const resolvers: {
         getConversation: (_: any, args: {
             userId: any;
         }, context: import("../../util/types").GraphQLContext) => Promise<({
-            participants: {
+            participants: ({
+                user: {
+                    id: string;
+                    email: string;
+                    phone: string | null;
+                    password: string | null;
+                    first_name: string | null;
+                    middle_name: string | null;
+                    last_name: string | null;
+                    image: string | null;
+                    emailVerified: Date | null;
+                    verification_code: string | null;
+                    is_active: boolean;
+                    is_reported: boolean;
+                    is_blocked: boolean;
+                    createdAt: Date;
+                    updatedAt: Date | null;
+                    role: import(".prisma/client").$Enums.Role;
+                };
+            } & {
                 id: string;
                 userId: string;
                 conversationId: string;
                 hasSeenLatestMessage: boolean;
-            }[];
+            })[];
             messages: {
                 id: string;
                 senderId: string;
@@ -80,11 +97,35 @@ declare const resolvers: {
             isPinned: boolean | null;
         })[]>;
     };
+    Subscription: {
+        convesations: {
+            subscribe: (_: any, __: any, context: import("../../util/types").GraphQLContext) => AsyncIterator<unknown, any, undefined>;
+        };
+    };
 } & {
     Query: {
-        getMessages: (_: any, args: {
+        messages: (_: any, args: {
             conversationId: string;
-        }, context: import("../../util/types").GraphQLContext) => Promise<{
+        }, context: import("../../util/types").GraphQLContext) => Promise<import("graphql").GraphQLError | ({
+            user: {
+                id: string;
+                email: string;
+                phone: string | null;
+                password: string | null;
+                first_name: string | null;
+                middle_name: string | null;
+                last_name: string | null;
+                image: string | null;
+                emailVerified: Date | null;
+                verification_code: string | null;
+                is_active: boolean;
+                is_reported: boolean;
+                is_blocked: boolean;
+                createdAt: Date;
+                updatedAt: Date | null;
+                role: import(".prisma/client").$Enums.Role;
+            };
+        } & {
             id: string;
             senderId: string;
             type: import(".prisma/client").$Enums.MessageType;
@@ -96,7 +137,7 @@ declare const resolvers: {
             deletedAt: Date | null;
             isRead: boolean | null;
             conversationId: string | null;
-        }[] | {
+        })[] | {
             error: unknown;
         }>;
     };
@@ -115,8 +156,8 @@ declare const resolvers: {
         }>;
     };
     Subscription: {
-        messages: {
-            subscribe: (_parent: any, args: any, context: import("../../util/types").GraphQLContext) => AsyncIterator<unknown, any, undefined>;
+        messageSent: {
+            subscribe: (_: any, __: any, context: import("../../util/types").GraphQLContext) => AsyncIterator<unknown, any, undefined>;
         };
     };
 };

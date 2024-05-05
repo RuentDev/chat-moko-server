@@ -27,8 +27,17 @@ const resolvers = {
           }
         },
         include: {
-          participants: true,
-          messages: true
+          participants: {
+            include: {
+              user: true
+            }
+          },
+          messages: {
+            take: 1,
+            orderBy: {
+              createdAt: 'desc'
+            }
+          }
         }
       });
 
@@ -38,7 +47,15 @@ const resolvers = {
 
   // Mutation: {},
 
-  // Subscription: {}
+  Subscription: {
+     convesations: {
+      subscribe: (_: any, __: any, context: GraphQLContext) => {
+        const { pubsub } = context
+        console.log("conversation-created")
+        return pubsub.asyncIterator(['CONVERSATION_CREATED'])
+      }
+    }
+  }
 }
 
 

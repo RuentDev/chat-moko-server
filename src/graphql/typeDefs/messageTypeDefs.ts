@@ -2,8 +2,6 @@ import { gql } from "apollo-server";
 
 
 const typeDefs = gql`
-
-
   scalar Date
   scalar Upload
   scalar File
@@ -21,6 +19,7 @@ const typeDefs = gql`
   type Message {
 		id: String
 		senderId: String
+		user: User
 		type: MessageType
 		content: String
 		attachment_thumb_url: String
@@ -28,10 +27,11 @@ const typeDefs = gql`
 		createdAt: Date
 		updatedAt: Date
 		deletedAt: Date
+		conversationId: String
 	}
 
   type Query {
-    getMessages(conversationId: String): [Message]
+    messages(conversationId: String): [Message]
   }
 
   type Mutation {
@@ -47,7 +47,7 @@ const typeDefs = gql`
 
 
   type Subscription{
-		messages(conversationId: String): [Message]
+		messageSent: Message
 	}
 
 `

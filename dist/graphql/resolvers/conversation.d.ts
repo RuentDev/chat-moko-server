@@ -4,12 +4,31 @@ declare const resolvers: {
         getConversation: (_: any, args: {
             userId: any;
         }, context: GraphQLContext) => Promise<({
-            participants: {
+            participants: ({
+                user: {
+                    id: string;
+                    email: string;
+                    phone: string | null;
+                    password: string | null;
+                    first_name: string | null;
+                    middle_name: string | null;
+                    last_name: string | null;
+                    image: string | null;
+                    emailVerified: Date | null;
+                    verification_code: string | null;
+                    is_active: boolean;
+                    is_reported: boolean;
+                    is_blocked: boolean;
+                    createdAt: Date;
+                    updatedAt: Date | null;
+                    role: import(".prisma/client").$Enums.Role;
+                };
+            } & {
                 id: string;
                 userId: string;
                 conversationId: string;
                 hasSeenLatestMessage: boolean;
-            }[];
+            })[];
             messages: {
                 id: string;
                 senderId: string;
@@ -32,6 +51,11 @@ declare const resolvers: {
             deletedAt: Date | null;
             isPinned: boolean | null;
         })[]>;
+    };
+    Subscription: {
+        convesations: {
+            subscribe: (_: any, __: any, context: GraphQLContext) => AsyncIterator<unknown, any, undefined>;
+        };
     };
 };
 export default resolvers;

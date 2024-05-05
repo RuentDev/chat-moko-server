@@ -26,15 +26,32 @@ const resolvers = {
                     }
                 },
                 include: {
-                    participants: true,
-                    messages: true
+                    participants: {
+                        include: {
+                            user: true
+                        }
+                    },
+                    messages: {
+                        take: 1,
+                        orderBy: {
+                            createdAt: 'desc'
+                        }
+                    }
                 }
             });
             return conversations;
         }),
     },
     // Mutation: {},
-    // Subscription: {}
+    Subscription: {
+        convesations: {
+            subscribe: (_, __, context) => {
+                const { pubsub } = context;
+                console.log("conversation-created");
+                return pubsub.asyncIterator(['CONVERSATION_CREATED']);
+            }
+        }
+    }
 };
 exports.default = resolvers;
 //# sourceMappingURL=conversation.js.map
