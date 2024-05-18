@@ -23,59 +23,61 @@ const jwt_secret = process.env.JWT_SECRET;
 const resolvers = {
     // Query: {},
     Mutation: {
-        userLogin: (_, args) => __awaiter(void 0, void 0, void 0, function* () {
+        userLogin: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
             try {
+                const { prisma, session } = context;
+                console.log(session);
                 if (!jwt_secret) {
                     return {
-                        error: "Please set JWT_SECRET in .env file"
+                        error: "Please set JWT_SECRET in .env file",
                     };
                 }
-                const { username, password } = args;
-                const userEmailExist = yield prisma.user.findUnique({
+                const { email, password } = args;
+                const user = yield prisma.user.findUnique({
                     where: {
-                        email: username
-                    }
+                        email: email,
+                    },
                 });
-                if (userEmailExist) {
-                    const { password: encodedPassword } = userEmailExist;
-                    if (encodedPassword) {
-                        const compareRes = yield bcrypt_1.default.compare(password, encodedPassword);
-                        if (!compareRes) {
-                            return {
-                                user: undefined,
-                                statusText: "Ivalid username or password!"
-                            };
-                        }
-                        const token = jsonwebtoken_1.default.sign({
-                            user: {
-                                email: userEmailExist.email,
-                                phone: userEmailExist.phone,
-                                first_name: userEmailExist.first_name,
-                                middle_name: userEmailExist.middle_name,
-                                last_name: userEmailExist.last_name,
-                                is_active: userEmailExist.is_active,
-                                is_blocked: userEmailExist.is_blocked,
-                                createAt: userEmailExist.createdAt,
-                                updatedAt: userEmailExist.updatedAt,
-                            }
-                        }, jwt_secret, { expiresIn: '30d' });
+                if (user && user.password) {
+                    const compareRes = bcrypt_1.default.compare(password, user.password);
+                    if (!compareRes) {
                         return {
-                            user: token,
-                            statusText: "Login Success!"
+                            error: "Ivalid username or password!",
                         };
                     }
-                }
-                else {
+                    // FIND ALL SESSION THAT WILL EXPIRE WITHIN 1 MONTH
+                    // const session = await prisma.session.findFirst({
+                    //   where: {
+                    //     userId: user.id,
+                    //     expires: {
+                    //       gte: new Date(Date.now()),
+                    //       lte: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+                    //     },
+                    //   },
+                    //   select: {
+                    //     sessionToken: true
+                    //   }
+                    // });
+                    // if(!session){
+                    //   return {
+                    //     error: "User not authorized"
+                    //   }
+                    // }
+                    const token = jsonwebtoken_1.default.sign({
+                        user: user,
+                    }, jwt_secret, { expiresIn: "120s" });
                     return {
-                        user: undefined,
-                        statusText: "User not registered!"
+                        token: token,
+                        statusText: "Login Success!",
                     };
                 }
+                return {
+                    statusText: "User not registered!",
+                };
             }
             catch (error) {
                 return {
                     error: error,
-                    user: undefined
                 };
             }
         }),
@@ -85,23 +87,23 @@ const resolvers = {
                 const { phone, password, firstName, middleName, lastName } = args;
                 if (!session || !session.user) {
                     return {
-                        error: "Session not available!"
+                        error: "Session not available!",
                     };
                 }
                 if (!jwt_secret)
                     return {
                         user: undefined,
-                        statusText: "Please set JWT_SECRET in .env file"
+                        statusText: "Please set JWT_SECRET in .env file",
                     };
                 const userExist = yield prisma.user.findUnique({
                     where: {
-                        email: session.user.email
-                    }
+                        email: session.user.email,
+                    },
                 });
                 if (!userExist) {
                     return {
                         user: undefined,
-                        statusText: "This user it not registered"
+                        statusText: "This user it not registered",
                     };
                 }
                 const saltRounds = 10;
@@ -118,11 +120,12 @@ const resolvers = {
                         middle_name: middleName,
                         last_name: lastName,
                         emailVerified: new Date(),
-                    }
+                    },
                 });
                 const token = jsonwebtoken_1.default.sign({
                     user: {
                         email: createRes.email,
+                        name: createRes.name,
                         phone: createRes.phone,
                         first_name: createRes.first_name,
                         middle_name: createRes.middle_name,
@@ -131,16 +134,16 @@ const resolvers = {
                         is_blocked: createRes.is_blocked,
                         createAt: createRes.createdAt,
                         updatedAt: createRes.updatedAt,
-                    }
-                }, jwt_secret, { expiresIn: '1d' });
+                    },
+                }, jwt_secret, { expiresIn: "1d" });
                 return {
                     user: token,
-                    statusText: "Create user success!"
+                    statusText: "Create user success!",
                 };
             }
             catch (error) {
                 return {
-                    error: error
+                    error: error,
                 };
             }
         }),
@@ -149,18 +152,18 @@ const resolvers = {
                 if (!jwt_secret)
                     return {
                         user: undefined,
-                        statusText: "Please set JWT_SECRET in .env file"
+                        statusText: "Please set JWT_SECRET in .env file",
                     };
                 const { email, phone, password, firstName, middleName, lastName } = args;
                 const userExist = yield prisma.user.findUnique({
                     where: {
-                        email: email
-                    }
+                        email: email,
+                    },
                 });
                 if (userExist) {
                     return {
                         user: undefined,
-                        statusText: "This user are already registered! Please use another email"
+                        statusText: "This user are already registered! Please use another email",
                     };
                 }
                 const saltRounds = 10;
@@ -169,12 +172,13 @@ const resolvers = {
                 const createRes = yield prisma.user.create({
                     data: {
                         email: email,
+                        name: `${firstName} ${middleName} ${lastName}`,
                         phone: phone,
                         password: hashPass,
                         first_name: firstName,
                         middle_name: middleName,
                         last_name: lastName,
-                    }
+                    },
                 });
                 const token = jsonwebtoken_1.default.sign({
                     user: {
@@ -187,17 +191,17 @@ const resolvers = {
                         is_blocked: createRes.is_blocked,
                         createAt: createRes.createdAt,
                         updatedAt: createRes.updatedAt,
-                    }
-                }, jwt_secret, { expiresIn: '1d' });
+                    },
+                }, jwt_secret, { expiresIn: "1d" });
                 return {
                     user: token,
-                    statusText: "Create user success!"
+                    statusText: "Create user success!",
                 };
             }
             catch (error) {
                 console.log(error);
                 return {
-                    error: error
+                    error: error,
                 };
             }
         }),

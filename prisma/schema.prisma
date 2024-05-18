@@ -13,6 +13,14 @@ enum Role {
   USER
 }
 
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  expires      DateTime
+  User         User     @relation(fields: [userId], references: [id])
+  userId       String
+}
+
 enum MessageType {
   SINGLE_CHAT
   GROUP_CHAT
@@ -40,13 +48,14 @@ model Account {
 model User {
   id                String                    @id @default(uuid()) @map("_id")
   email             String                    @unique
+  name String
+  image             String?
+  emailVerified     DateTime?
   phone             String?
   password          String?
   first_name        String?
   middle_name       String?
   last_name         String?
-  image             String?
-  emailVerified     DateTime?
   verification_code String?
   is_active         Boolean                   @default(false)
   is_reported       Boolean                   @default(false)
@@ -56,7 +65,8 @@ model User {
   role              Role                      @default(USER) // User role
   conversations     ConversationParticipant[]
   account           Account[]
-  Message           Message[]
+  session           Session[]
+  messages          Message[]
 }
 
 model ConversationParticipant {
@@ -82,7 +92,6 @@ model Conversation {
 
 model Message {
   id                   String        @id @default(uuid()) @map("_id")
-  senderId             String
   type                 MessageType   @default(SINGLE_CHAT) // Message type
   content              String
   attachment_thumb_url String? // Thumbnail URL for attachments (optional)
@@ -93,5 +102,6 @@ model Message {
   isRead               Boolean?
   conversation         Conversation? @relation(fields: [conversationId], references: [id])
   conversationId       String?
-  user                 User          @relation(fields: [senderId], references: [id])
+  user User?           @relation(fields: [senderId], references: [id])
+  senderId             String
 }

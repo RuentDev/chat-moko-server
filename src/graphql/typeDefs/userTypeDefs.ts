@@ -1,21 +1,20 @@
 import { gql } from "apollo-server";
 
 const typeDefs = gql`
-
-
   scalar Date
   scalar Upload
   scalar File
 
   type AuthResponse {
-		user: String
-		statusText: String
-		error: String
-	}
+    token: String
+    statusText: String
+    error: String
+  }
 
   type User {
     id: ID!
     email: String!
+    name: String
     phone: String
     image: String
     first_name: String
@@ -33,29 +32,25 @@ const typeDefs = gql`
   # type Query {}
 
   type Mutation {
-
-		userLogin(username: String, password: String): AuthResponse
+    userLogin(email: String, password: String): AuthResponse
 
     createUserAccount(
-      phone: String,
-			password: String
-			firstName: String,
-			middleName: String,
-			lastName: String,
+      phone: String
+      password: String
+      firstName: String
+      middleName: String
+      lastName: String
     ): AuthResponse
 
-
     registerUser(
-			email: String,
-			phone: String,
-			password: String
-			firstName: String,
-			middleName: String,
-			lastName: String,
-		): AuthResponse
+      email: String
+      phone: String
+      password: String
+      firstName: String
+      middleName: String
+      lastName: String
+    ): AuthResponse
   }
-
 `;
-
 
 export default typeDefs;

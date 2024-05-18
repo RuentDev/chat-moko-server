@@ -7,9 +7,9 @@ const typeDefs = (0, apollo_server_1.gql) `
   scalar File
 
   type ChatResponse {
-		error: String
-		statusText: String
-	}
+    error: String
+    statusText: String
+  }
 
   enum MessageType {
     SINGLE_CHAT
@@ -17,18 +17,18 @@ const typeDefs = (0, apollo_server_1.gql) `
   }
 
   type Message {
-		id: String
-		senderId: String
-		user: User
-		type: MessageType
-		content: String
-		attachment_thumb_url: String
-		attachment_url: String
-		createdAt: Date
-		updatedAt: Date
-		deletedAt: Date
-		conversationId: String
-	}
+    id: String
+    senderId: String
+    user: User
+    type: MessageType
+    content: String
+    attachment_thumb_url: String
+    attachment_url: String
+    createdAt: Date
+    updatedAt: Date
+    deletedAt: Date
+    conversationId: String
+  }
 
   type Query {
     messages(conversationId: String): [Message]
@@ -36,20 +36,17 @@ const typeDefs = (0, apollo_server_1.gql) `
 
   type Mutation {
     sendMessage(
-			conversationId: String,
-			senderId: String
-			recipientId: String
-			content: String
-			media: [String]
-			files: [File]
-		): ChatResponse 
+      conversationId: String
+      participants: [String]
+      content: String
+      media: [String]
+      files: [File]
+    ): ChatResponse
   }
 
-
-  type Subscription{
-		messageSent: Message
-	}
-
+  type Subscription {
+    messageSent: Message
+  }
 `;
 exports.default = typeDefs;
 //# sourceMappingURL=messageTypeDefs.js.map

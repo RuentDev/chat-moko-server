@@ -1,34 +1,29 @@
-import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { GraphQLContext, Session, SubscriptionContext } from "./util/types";
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import { expressMiddleware } from '@apollo/server/express4';
-import { useServer } from 'graphql-ws/lib/use/ws'
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { expressMiddleware } from "@apollo/server/express4";
+import { useServer } from "graphql-ws/lib/use/ws";
 import { PubSub } from "graphql-subscriptions";
-import { PrismaClient } from '@prisma/client';
-import { ApolloServer } from '@apollo/server';
-import resolvers from "./graphql/resolvers"
-import typeDefs from "./graphql/typeDefs"
-import { WebSocketServer } from 'ws';
-import { config } from 'dotenv';
-import jwt from 'jsonwebtoken';
-import express from 'express';
-import http from 'http';
-import cors from 'cors';
-import { getServerSession } from './util/index';
+import { PrismaClient } from "@prisma/client";
+import { ApolloServer } from "@apollo/server";
+import resolvers from "./graphql/resolvers";
+import typeDefs from "./graphql/typeDefs";
+import { WebSocketServer } from "ws";
+import { config } from "dotenv";
+import express from "express";
+import http from "http";
+import cors from "cors";
+import { getServerSession } from "./util/index";
 
+config();
 async function init() {
-  config();
-
 
   const PORT = 4000;
   const app = express();
   const httpServer = http.createServer(app);
 
-  const pubsub = new PubSub()
+  const pubsub = new PubSub();
   const prisma = new PrismaClient();
-
-  const jwt_secret = process.env.JWT_SECRET
-
 
   // Creating the WebSocket server
   const wsServer = new WebSocketServer({
@@ -36,12 +31,14 @@ async function init() {
     server: httpServer,
     // Pass a different path here if app.use
     // serves expressMiddleware at a different path
-    path: '/graphql',
+    path: "/graphql",
   });
 
-  const schema = makeExecutableSchema({ typeDefs, resolvers })
+  const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-  const getSubscriptionContext = async ( ctx: SubscriptionContext): Promise<GraphQLContext> => {
+  const getSubscriptionContext = async (
+    ctx: SubscriptionContext
+  ): Promise<GraphQLContext> => {
     ctx;
     // ctx is the graphql-ws Context where connectionParams live
     if (ctx.connectionParams && ctx.connectionParams.session) {
@@ -51,7 +48,6 @@ async function init() {
     // Otherwise let our resolvers know we don't have a current user
     return { session: null, prisma, pubsub };
   };
-
 
   // Hand in the schema we just created and have the
   // WebSocketServer start listening.
@@ -65,12 +61,12 @@ async function init() {
         return getSubscriptionContext(ctx);
       },
     },
-    wsServer);
+    wsServer
+  );
 
   const server = new ApolloServer({
     schema,
     csrfPrevention: true,
-    
     plugins: [
       // Proper shutdown for the HTTP server.
       ApolloServerPluginDrainHttpServer({ httpServer }),
@@ -85,7 +81,7 @@ async function init() {
           };
         },
       },
-    ]
+    ],
   });
 
   await server.start();
@@ -96,24 +92,20 @@ async function init() {
   };
 
   app.use(
-    '/graphql',
+    "/graphql",
     cors<cors.CorsRequest>(corsOptions),
     express.json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
-        const session = await getServerSession(req.headers.cookie)
+        const session = await getServerSession(req.headers.cookie);
         return { session: session as Session, prisma, pubsub };
       },
-    }),
+    })
   );
-
 
   httpServer.listen(PORT, () => {
     console.log(`Server is now running on http://localhost:${PORT}/graphql`);
   });
-
-
 }
 
 init().catch((err) => console.log(err));
-

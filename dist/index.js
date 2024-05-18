@@ -27,22 +27,21 @@ const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const cors_1 = __importDefault(require("cors"));
 const index_1 = require("./util/index");
+(0, dotenv_1.config)();
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
-        (0, dotenv_1.config)();
         const PORT = 4000;
         const app = (0, express_1.default)();
         const httpServer = http_1.default.createServer(app);
         const pubsub = new graphql_subscriptions_1.PubSub();
         const prisma = new client_1.PrismaClient();
-        const jwt_secret = process.env.JWT_SECRET;
         // Creating the WebSocket server
         const wsServer = new ws_2.WebSocketServer({
             // This is the `httpServer` we created in a previous step.
             server: httpServer,
             // Pass a different path here if app.use
             // serves expressMiddleware at a different path
-            path: '/graphql',
+            path: "/graphql",
         });
         const schema = (0, schema_1.makeExecutableSchema)({ typeDefs: typeDefs_1.default, resolvers: resolvers_1.default });
         const getSubscriptionContext = (ctx) => __awaiter(this, void 0, void 0, function* () {
@@ -86,14 +85,14 @@ function init() {
                         });
                     },
                 },
-            ]
+            ],
         });
         yield server.start();
         const corsOptions = {
             origin: process.env.BASE_URL,
             credentials: true,
         };
-        app.use('/graphql', (0, cors_1.default)(corsOptions), express_1.default.json(), (0, express4_1.expressMiddleware)(server, {
+        app.use("/graphql", (0, cors_1.default)(corsOptions), express_1.default.json(), (0, express4_1.expressMiddleware)(server, {
             context: (_a) => __awaiter(this, [_a], void 0, function* ({ req }) {
                 const session = yield (0, index_1.getServerSession)(req.headers.cookie);
                 return { session: session, prisma, pubsub };

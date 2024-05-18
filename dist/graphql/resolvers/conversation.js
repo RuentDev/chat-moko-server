@@ -9,35 +9,61 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// export const pubsub = new PubSub()
-// const prisma = new PrismaClient();
-const jwt_secret = process.env.JWT_SECRET;
+const graphql_1 = require("graphql");
 const resolvers = {
     Query: {
-        getConversation: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
-            const { session, prisma, pubsub } = context;
-            // find all conversation of the user
+        conversations: (_, __, context) => __awaiter(void 0, void 0, void 0, function* () {
+            var _a;
+            const { session, prisma } = context;
+            if (!(session === null || session === void 0 ? void 0 : session.user)) {
+                return new graphql_1.GraphQLError("Not authorized");
+            }
             const conversations = yield prisma.conversation.findMany({
                 where: {
                     participants: {
                         some: {
-                            userId: args.userId,
-                        }
-                    }
+                            userId: (_a = session === null || session === void 0 ? void 0 : session.user) === null || _a === void 0 ? void 0 : _a.id,
+                        },
+                    },
                 },
                 include: {
                     participants: {
                         include: {
-                            user: true
-                        }
+                            user: true,
+                        },
                     },
                     messages: {
                         take: 1,
                         orderBy: {
-                            createdAt: 'desc'
-                        }
-                    }
-                }
+                            createdAt: "desc",
+                        },
+                    },
+                },
+            });
+            return conversations;
+        }),
+        getConversation: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
+            const { session, prisma } = context;
+            if (!(session === null || session === void 0 ? void 0 : session.user)) {
+                return new graphql_1.GraphQLError("Not authorized");
+            }
+            const conversations = yield prisma.conversation.findUnique({
+                where: {
+                    id: args.conversationId,
+                },
+                include: {
+                    participants: {
+                        include: {
+                            user: true,
+                        },
+                    },
+                    messages: {
+                        take: 1,
+                        orderBy: {
+                            createdAt: "desc",
+                        },
+                    },
+                },
             });
             return conversations;
         }),
@@ -47,11 +73,11 @@ const resolvers = {
         convesations: {
             subscribe: (_, __, context) => {
                 const { pubsub } = context;
-                console.log("conversation-created");
-                return pubsub.asyncIterator(['CONVERSATION_CREATED']);
-            }
-        }
-    }
+                console.log("conversations subscribed");
+                return pubsub.asyncIterator(["CONVERSATION_CREATED"]);
+            },
+        },
+    },
 };
 exports.default = resolvers;
 //# sourceMappingURL=conversation.js.map
