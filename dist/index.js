@@ -93,7 +93,7 @@ function init() {
             credentials: true,
         };
         app.use("/graphql", (0, cors_1.default)(corsOptions), express_1.default.json(), (0, express4_1.expressMiddleware)(server, {
-            context: (_a) => __awaiter(this, [_a], void 0, function* ({ req }) {
+            context: ({ req }) => __awaiter(this, void 0, void 0, function* () {
                 const session = yield (0, index_1.getServerSession)(req.headers.cookie);
                 return { session: session, prisma, pubsub };
             }),

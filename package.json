@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "dev:ts": "tsc -w",
-    "dev:js": "nodemon --trace-warnings dist/index.js"
+    "dev:js": "nodemon dist/index.js"
   },
   "author": "Ruentgen",
   "license": "ISC",
