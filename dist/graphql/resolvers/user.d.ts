@@ -30,16 +30,10 @@ declare const resolvers: {
             statusText?: undefined;
         }>;
         registerUser: (_: any, args: any) => Promise<{
-            user: undefined;
-            statusText: string;
-            error?: undefined;
-        } | {
-            user: string;
             statusText: string;
             error?: undefined;
         } | {
             error: unknown;
-            user?: undefined;
             statusText?: undefined;
         }>;
     };

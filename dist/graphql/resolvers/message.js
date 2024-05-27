@@ -44,7 +44,6 @@ const resolvers = {
                 return messages;
             }
             catch (error) {
-                console.log(error);
                 return {
                     error: error,
                 };
@@ -175,7 +174,6 @@ const resolvers = {
                     };
                 }
                 else {
-                    console.log("sent with conversation");
                     const message = yield prisma.message.create({
                         data: {
                             senderId: session.user.id,
@@ -200,7 +198,6 @@ const resolvers = {
                 }
             }
             catch (error) {
-                console.log(error);
                 return {
                     error: error,
                 };

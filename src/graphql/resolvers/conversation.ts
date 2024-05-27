@@ -5,68 +5,80 @@ import { GraphQLError } from "graphql";
 const resolvers = {
   Query: {
     conversations: async (_: any, __: any, context: GraphQLContext) => {
-      const { session, prisma } = context;
+      try {
+        const { session, prisma } = context;
 
-      if (!session?.user) {
-        return new GraphQLError("Not authorized");
+        if (!session?.user) {
+          return new GraphQLError("Not authorized");
+        }
+
+        const conversations = await prisma.conversation.findMany({
+          where: {
+            participants: {
+              some: {
+                userId: session?.user?.id,
+              },
+            },
+          },
+          include: {
+            participants: {
+              include: {
+                user: true,
+              },
+            },
+            messages: {
+              take: 1,
+              orderBy: {
+                createdAt: "desc",
+              },
+            },
+          },
+        });
+
+        return conversations;
+      } catch (error) {
+        return{
+          error: error
+        }
       }
-
-      const conversations = await prisma.conversation.findMany({
-        where: {
-          participants: {
-            some: {
-              userId: session?.user?.id,
-            },
-          },
-        },
-        include: {
-          participants: {
-            include: {
-              user: true,
-            },
-          },
-          messages: {
-            take: 1,
-            orderBy: {
-              createdAt: "desc",
-            },
-          },
-        },
-      });
-
-      return conversations;
     },
     getConversation: async (
       _: any,
       args: { conversationId: string },
       context: GraphQLContext
     ) => {
-      const { session, prisma } = context;
+      try {
+        const { session, prisma } = context;
 
-      if (!session?.user) {
-        return new GraphQLError("Not authorized");
+        if (!session?.user) {
+          return new GraphQLError("Not authorized");
+        }
+  
+        const conversations = await prisma.conversation.findUnique({
+          where: {
+            id: args.conversationId,
+          },
+          include: {
+            participants: {
+              include: {
+                user: true,
+              },
+            },
+            messages: {
+              take: 1,
+              orderBy: {
+                createdAt: "desc",
+              },
+            },
+          },
+        });
+  
+        return conversations;
+      } catch (error) {
+        return {
+          error
+        }
       }
-
-      const conversations = await prisma.conversation.findUnique({
-        where: {
-          id: args.conversationId,
-        },
-        include: {
-          participants: {
-            include: {
-              user: true,
-            },
-          },
-          messages: {
-            take: 1,
-            orderBy: {
-              createdAt: "desc",
-            },
-          },
-        },
-      });
-
-      return conversations;
     },
   },
 
@@ -75,9 +87,15 @@ const resolvers = {
   Subscription: {
     convesations: {
       subscribe: (_: any, __: any, context: GraphQLContext) => {
-        const { pubsub } = context;
-        console.log("conversations subscribed");
-        return pubsub.asyncIterator(["CONVERSATION_CREATED"]);
+        try {
+          const { pubsub } = context;
+          console.log("conversations subscribed");
+          return pubsub.asyncIterator(["CONVERSATION_CREATED"]);
+        } catch (error) {
+          return {
+            error: error,
+          }
+        }
       },
     },
   },

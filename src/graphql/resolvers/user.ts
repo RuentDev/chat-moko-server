@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { GraphQLContext } from "../../util/types";
-import { error } from "console";
 
 export const pubsub = new PubSub();
 const prisma = new PrismaClient();
@@ -86,6 +85,7 @@ const resolvers = {
         };
       }
     },
+
     createUserAccount: async (_: any, args: any, context: GraphQLContext) => {
       try {
         const { session, prisma } = context;
@@ -168,14 +168,14 @@ const resolvers = {
 
     registerUser: async (_: any, args: any) => {
       try {
-        if (!jwt_secret)
-          return {
-            user: undefined,
-            statusText: "Please set JWT_SECRET in .env file",
-          };
 
-        const { email, phone, password, firstName, middleName, lastName } =
-          args;
+        if (!jwt_secret){
+          return {
+            error: "Please set JWT_SECRET in .env file",
+          };
+        }
+
+        const { email, phone, password, firstName, middleName, lastName } = args;
 
         const userExist = await prisma.user.findUnique({
           where: {
@@ -185,9 +185,7 @@ const resolvers = {
 
         if (userExist) {
           return {
-            user: undefined,
-            statusText:
-              "This user are already registered! Please use another email",
+            error: "This user are already registered! Please use another email",
           };
         }
 
@@ -196,7 +194,7 @@ const resolvers = {
         const salt = bcrypt.genSaltSync(saltRounds);
         const hashPass = bcrypt.hashSync(password, salt);
 
-        const createRes = await prisma.user.create({
+        const user = await prisma.user.create({
           data: {
             email: email,
             name: `${firstName} ${middleName} ${lastName}`,
@@ -208,30 +206,16 @@ const resolvers = {
           },
         });
 
-        const token = jwt.sign(
-          {
-            user: {
-              email: createRes.email,
-              phone: createRes.phone,
-              first_name: createRes.first_name,
-              middle_name: createRes.middle_name,
-              last_name: createRes.last_name,
-              is_active: createRes.is_active,
-              is_blocked: createRes.is_blocked,
-              createAt: createRes.createdAt,
-              updatedAt: createRes.updatedAt,
-            },
-          },
-          jwt_secret,
-          { expiresIn: "1d" }
-        );
+        if(!user){
+          return {
+            error: "Failed to create user!",
+          }
+        }
 
         return {
-          user: token,
           statusText: "Create user success!",
         };
       } catch (error) {
-        console.log(error);
         return {
           error: error,
         };

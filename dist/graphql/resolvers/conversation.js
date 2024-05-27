@@ -14,67 +14,88 @@ const resolvers = {
     Query: {
         conversations: (_, __, context) => __awaiter(void 0, void 0, void 0, function* () {
             var _a;
-            const { session, prisma } = context;
-            if (!(session === null || session === void 0 ? void 0 : session.user)) {
-                return new graphql_1.GraphQLError("Not authorized");
+            try {
+                const { session, prisma } = context;
+                if (!(session === null || session === void 0 ? void 0 : session.user)) {
+                    return new graphql_1.GraphQLError("Not authorized");
+                }
+                const conversations = yield prisma.conversation.findMany({
+                    where: {
+                        participants: {
+                            some: {
+                                userId: (_a = session === null || session === void 0 ? void 0 : session.user) === null || _a === void 0 ? void 0 : _a.id,
+                            },
+                        },
+                    },
+                    include: {
+                        participants: {
+                            include: {
+                                user: true,
+                            },
+                        },
+                        messages: {
+                            take: 1,
+                            orderBy: {
+                                createdAt: "desc",
+                            },
+                        },
+                    },
+                });
+                return conversations;
             }
-            const conversations = yield prisma.conversation.findMany({
-                where: {
-                    participants: {
-                        some: {
-                            userId: (_a = session === null || session === void 0 ? void 0 : session.user) === null || _a === void 0 ? void 0 : _a.id,
-                        },
-                    },
-                },
-                include: {
-                    participants: {
-                        include: {
-                            user: true,
-                        },
-                    },
-                    messages: {
-                        take: 1,
-                        orderBy: {
-                            createdAt: "desc",
-                        },
-                    },
-                },
-            });
-            return conversations;
+            catch (error) {
+                return {
+                    error: error
+                };
+            }
         }),
         getConversation: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
-            const { session, prisma } = context;
-            if (!(session === null || session === void 0 ? void 0 : session.user)) {
-                return new graphql_1.GraphQLError("Not authorized");
+            try {
+                const { session, prisma } = context;
+                if (!(session === null || session === void 0 ? void 0 : session.user)) {
+                    return new graphql_1.GraphQLError("Not authorized");
+                }
+                const conversations = yield prisma.conversation.findUnique({
+                    where: {
+                        id: args.conversationId,
+                    },
+                    include: {
+                        participants: {
+                            include: {
+                                user: true,
+                            },
+                        },
+                        messages: {
+                            take: 1,
+                            orderBy: {
+                                createdAt: "desc",
+                            },
+                        },
+                    },
+                });
+                return conversations;
             }
-            const conversations = yield prisma.conversation.findUnique({
-                where: {
-                    id: args.conversationId,
-                },
-                include: {
-                    participants: {
-                        include: {
-                            user: true,
-                        },
-                    },
-                    messages: {
-                        take: 1,
-                        orderBy: {
-                            createdAt: "desc",
-                        },
-                    },
-                },
-            });
-            return conversations;
+            catch (error) {
+                return {
+                    error
+                };
+            }
         }),
     },
     // Mutation: {},
     Subscription: {
         convesations: {
             subscribe: (_, __, context) => {
-                const { pubsub } = context;
-                console.log("conversations subscribed");
-                return pubsub.asyncIterator(["CONVERSATION_CREATED"]);
+                try {
+                    const { pubsub } = context;
+                    console.log("conversations subscribed");
+                    return pubsub.asyncIterator(["CONVERSATION_CREATED"]);
+                }
+                catch (error) {
+                    return {
+                        error: error,
+                    };
+                }
             },
         },
     },
