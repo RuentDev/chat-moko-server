@@ -17,11 +17,45 @@ const graphql_subscriptions_1 = require("graphql-subscriptions");
 const client_1 = require("@prisma/client");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const graphql_1 = require("graphql");
 exports.pubsub = new graphql_subscriptions_1.PubSub();
 const prisma = new client_1.PrismaClient();
 const jwt_secret = process.env.JWT_SECRET;
 const resolvers = {
-    // Query: {},
+    Query: {
+        searchUsers: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
+            var _a;
+            try {
+                const { session } = context;
+                if (!session) {
+                    throw new graphql_1.GraphQLError("Not authorized");
+                }
+                const users = yield prisma.user.findMany({
+                    where: {
+                        name: {
+                            contains: args.name,
+                            not: (_a = session.user) === null || _a === void 0 ? void 0 : _a.name,
+                            mode: "insensitive",
+                        }
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        image: true,
+                    }
+                });
+                return {
+                    users: users
+                };
+            }
+            catch (error) {
+                return {
+                    error: error
+                };
+            }
+        })
+    },
     Mutation: {
         userLogin: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
             try {

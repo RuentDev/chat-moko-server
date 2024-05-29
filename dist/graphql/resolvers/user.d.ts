@@ -2,6 +2,22 @@ import { PubSub } from "graphql-subscriptions";
 import { GraphQLContext } from "../../util/types";
 export declare const pubsub: PubSub;
 declare const resolvers: {
+    Query: {
+        searchUsers: (_: any, args: {
+            name: string;
+        }, context: GraphQLContext) => Promise<{
+            users: {
+                image: string | null;
+                name: string;
+                id: string;
+                email: string;
+            }[];
+            error?: undefined;
+        } | {
+            error: unknown;
+            users?: undefined;
+        }>;
+    };
     Mutation: {
         userLogin: (_: any, args: any, context: GraphQLContext) => Promise<{
             token: string;

@@ -1,4 +1,20 @@
 declare const resolvers: {
+    Query: {
+        searchUsers: (_: any, args: {
+            name: string;
+        }, context: import("../../util/types").GraphQLContext) => Promise<{
+            users: {
+                image: string | null;
+                name: string;
+                id: string;
+                email: string;
+            }[];
+            error?: undefined;
+        } | {
+            error: unknown;
+            users?: undefined;
+        }>;
+    };
     Mutation: {
         userLogin: (_: any, args: any, context: import("../../util/types").GraphQLContext) => Promise<{
             token: string;

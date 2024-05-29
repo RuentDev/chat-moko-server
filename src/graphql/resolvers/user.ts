@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { GraphQLContext } from "../../util/types";
+import { GraphQLError } from "graphql";
 
 export const pubsub = new PubSub();
 const prisma = new PrismaClient();
@@ -10,7 +11,45 @@ const prisma = new PrismaClient();
 const jwt_secret = process.env.JWT_SECRET;
 
 const resolvers = {
-  // Query: {},
+  Query: {
+    searchUsers: async (_: any, args: {name: string}, context: GraphQLContext) => {
+      try {
+        const {session} = context
+
+        if(!session){
+          throw new GraphQLError("Not authorized")
+        }
+
+
+        const users = await prisma.user.findMany({
+          where: {
+            name: {
+              contains: args.name,
+              not: session.user?.name,
+              mode: "insensitive",
+            }
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          }
+        })
+
+        return {
+          users: users
+        }
+
+      } catch (error) {
+
+        return {
+          error: error
+        }
+        
+      }
+    }
+  },
 
   Mutation: {
     userLogin: async (_: any, args: any, context: GraphQLContext) => {
