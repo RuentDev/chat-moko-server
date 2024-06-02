@@ -89,10 +89,7 @@ function init() {
         });
         yield server.start();
         const corsOptions = {
-            origin: [
-                process.env.BASE_URL,
-                process.env.ALLOWED_ORIGIN1,
-            ],
+            origin: process.env.BASE_URL,
             credentials: true,
         };
         app.use("/graphql", (0, cors_1.default)(corsOptions), express_1.default.json(), (0, express4_1.expressMiddleware)(server, {
