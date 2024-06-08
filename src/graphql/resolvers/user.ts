@@ -1,12 +1,10 @@
 import { PubSub } from "graphql-subscriptions";
-import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { GraphQLContext } from "../../util/types";
 import { GraphQLError } from "graphql";
 
 export const pubsub = new PubSub();
-const prisma = new PrismaClient();
 
 const jwt_secret = process.env.JWT_SECRET;
 
@@ -14,7 +12,7 @@ const resolvers = {
   Query: {
     searchUsers: async (_: any, args: {name: string}, context: GraphQLContext) => {
       try {
-        const {session} = context
+        const {session, prisma} = context
 
         if(!session){
           throw new GraphQLError("Not authorized")
@@ -48,15 +46,48 @@ const resolvers = {
         }
         
       }
-    }
+    },
+    friends: async (_: any, __: any, context: GraphQLContext) => {
+      try {
+        const { session, prisma } = context;
+
+        if(!session){
+          return {
+            error: "Not authorized" 
+          }
+        }
+
+        if(!session.user){
+          return {
+            error: "Not authorized" 
+          }
+        }
+
+        const friends = await prisma.user.findMany({
+          where: {
+            id: session.user.id
+          },
+          select: {
+            friends: true
+          }
+        })
+
+
+        return friends
+        
+      } catch (error) {
+        console.log(error)
+        return {
+          error: error
+        }
+      }
+    },
   },
 
   Mutation: {
     userLogin: async (_: any, args: any, context: GraphQLContext) => {
       try {
         const { prisma, session } = context;
-
-        console.log(session);
 
         if (!jwt_secret) {
           return {
@@ -205,9 +236,10 @@ const resolvers = {
       }
     },
 
-    registerUser: async (_: any, args: any) => {
+    registerUser: async (_: any, args: any, context: GraphQLContext) => {
       try {
 
+        const { prisma } = context
         if (!jwt_secret){
           return {
             error: "Please set JWT_SECRET in .env file",

@@ -7,15 +7,37 @@ declare const resolvers: {
             name: string;
         }, context: GraphQLContext) => Promise<{
             users: {
-                image: string | null;
                 name: string;
                 id: string;
                 email: string;
+                image: string | null;
             }[];
             error?: undefined;
         } | {
             error: unknown;
             users?: undefined;
+        }>;
+        friends: (_: any, __: any, context: GraphQLContext) => Promise<{
+            id: string;
+            email: string;
+            name: string;
+            image: string | null;
+            emailVerified: Date | null;
+            phone: string | null;
+            password: string | null;
+            first_name: string | null;
+            middle_name: string | null;
+            last_name: string | null;
+            verification_code: string | null;
+            is_active: boolean;
+            is_reported: boolean;
+            is_blocked: boolean;
+            createdAt: Date;
+            updatedAt: Date | null;
+            role: import(".prisma/client").$Enums.Role;
+            friendId: string | null;
+        }[] | {
+            error: unknown;
         }>;
     };
     Mutation: {
@@ -45,7 +67,7 @@ declare const resolvers: {
             user?: undefined;
             statusText?: undefined;
         }>;
-        registerUser: (_: any, args: any) => Promise<{
+        registerUser: (_: any, args: any, context: GraphQLContext) => Promise<{
             statusText: string;
             error?: undefined;
         } | {

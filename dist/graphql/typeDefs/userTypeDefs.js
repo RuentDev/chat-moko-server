@@ -43,6 +43,7 @@ const typeDefs = (0, apollo_server_1.gql) `
   }
 
   type Query {
+    friends(userId: String): [User]
     searchUsers(name: String): SearchedUsersResponse
   }
 

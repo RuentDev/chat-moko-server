@@ -42,6 +42,7 @@ const typeDefs = gql`
   }
 
   type Query {
+    friends(userId: String): [User]
     searchUsers(name: String): SearchedUsersResponse
   }
 

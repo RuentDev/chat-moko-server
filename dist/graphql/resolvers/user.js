@@ -14,19 +14,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pubsub = void 0;
 const graphql_subscriptions_1 = require("graphql-subscriptions");
-const client_1 = require("@prisma/client");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const graphql_1 = require("graphql");
 exports.pubsub = new graphql_subscriptions_1.PubSub();
-const prisma = new client_1.PrismaClient();
 const jwt_secret = process.env.JWT_SECRET;
 const resolvers = {
     Query: {
         searchUsers: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
             var _a;
             try {
-                const { session } = context;
+                const { session, prisma } = context;
                 if (!session) {
                     throw new graphql_1.GraphQLError("Not authorized");
                 }
@@ -54,13 +52,39 @@ const resolvers = {
                     error: error
                 };
             }
-        })
+        }),
+        friends: (_, __, context) => __awaiter(void 0, void 0, void 0, function* () {
+            try {
+                const { session, prisma } = context;
+                if (!session) {
+                    return {
+                        error: "Not authorized"
+                    };
+                }
+                if (!session.user) {
+                    return {
+                        error: "Not authorized"
+                    };
+                }
+                const friends = yield prisma.user.findMany({
+                    where: {
+                        id: session.user.id
+                    }
+                });
+                return friends;
+            }
+            catch (error) {
+                console.log(error);
+                return {
+                    error: error
+                };
+            }
+        }),
     },
     Mutation: {
         userLogin: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 const { prisma, session } = context;
-                console.log(session);
                 if (!jwt_secret) {
                     return {
                         error: "Please set JWT_SECRET in .env file",
@@ -181,8 +205,9 @@ const resolvers = {
                 };
             }
         }),
-        registerUser: (_, args) => __awaiter(void 0, void 0, void 0, function* () {
+        registerUser: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
             try {
+                const { prisma } = context;
                 if (!jwt_secret) {
                     return {
                         error: "Please set JWT_SECRET in .env file",
