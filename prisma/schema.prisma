@@ -67,9 +67,9 @@ model User {
   account           Account[]
   session           Session[]
   messages          Message[]
-  friendId          String?
-  friend            User?                     @relation("UserFriends", fields: [friendId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  friends           User[]                    @relation("UserFriends")
+  connectionId      String?
+  connection        User?                     @relation("UserConnections", fields: [connectionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  connections       User[]                    @relation("UserConnections")
 }
 
 model ConversationParticipant {

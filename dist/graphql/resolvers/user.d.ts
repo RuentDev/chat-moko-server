@@ -7,9 +7,9 @@ declare const resolvers: {
             name: string;
         }, context: GraphQLContext) => Promise<{
             users: {
-                name: string;
                 id: string;
                 email: string;
+                name: string;
                 image: string | null;
             }[];
             error?: undefined;
@@ -17,27 +17,35 @@ declare const resolvers: {
             error: unknown;
             users?: undefined;
         }>;
-        friends: (_: any, __: any, context: GraphQLContext) => Promise<{
-            id: string;
-            email: string;
-            name: string;
-            image: string | null;
-            emailVerified: Date | null;
-            phone: string | null;
-            password: string | null;
-            first_name: string | null;
-            middle_name: string | null;
-            last_name: string | null;
-            verification_code: string | null;
-            is_active: boolean;
-            is_reported: boolean;
-            is_blocked: boolean;
-            createdAt: Date;
-            updatedAt: Date | null;
-            role: import(".prisma/client").$Enums.Role;
-            friendId: string | null;
-        }[] | {
+        connections: (_: any, __: any, context: GraphQLContext) => Promise<{
+            data: {
+                connections: {
+                    id: string;
+                    email: string;
+                    name: string;
+                    image: string | null;
+                    emailVerified: Date | null;
+                    phone: string | null;
+                    password: string | null;
+                    first_name: string | null;
+                    middle_name: string | null;
+                    last_name: string | null;
+                    verification_code: string | null;
+                    is_active: boolean;
+                    is_reported: boolean;
+                    is_blocked: boolean;
+                    createdAt: Date;
+                    updatedAt: Date | null;
+                    role: import(".prisma/client").$Enums.Role;
+                    connectionId: string | null;
+                }[];
+            }[];
+            statusText: string;
+            error?: undefined;
+        } | {
             error: unknown;
+            data?: undefined;
+            statusText?: undefined;
         }>;
     };
     Mutation: {
@@ -72,6 +80,57 @@ declare const resolvers: {
             error?: undefined;
         } | {
             error: unknown;
+            statusText?: undefined;
+        }>;
+        addConnection: (_: any, args: {
+            id: string;
+        }, context: GraphQLContext) => Promise<{
+            data: {
+                connections: {
+                    id: string;
+                    email: string;
+                    name: string;
+                    image: string | null;
+                    emailVerified: Date | null;
+                    phone: string | null;
+                    password: string | null;
+                    first_name: string | null;
+                    middle_name: string | null;
+                    last_name: string | null;
+                    verification_code: string | null;
+                    is_active: boolean;
+                    is_reported: boolean;
+                    is_blocked: boolean;
+                    createdAt: Date;
+                    updatedAt: Date | null;
+                    role: import(".prisma/client").$Enums.Role;
+                    connectionId: string | null;
+                }[];
+            } & {
+                id: string;
+                email: string;
+                name: string;
+                image: string | null;
+                emailVerified: Date | null;
+                phone: string | null;
+                password: string | null;
+                first_name: string | null;
+                middle_name: string | null;
+                last_name: string | null;
+                verification_code: string | null;
+                is_active: boolean;
+                is_reported: boolean;
+                is_blocked: boolean;
+                createdAt: Date;
+                updatedAt: Date | null;
+                role: import(".prisma/client").$Enums.Role;
+                connectionId: string | null;
+            };
+            statusText: string;
+            error?: undefined;
+        } | {
+            error: unknown;
+            data?: undefined;
             statusText?: undefined;
         }>;
     };

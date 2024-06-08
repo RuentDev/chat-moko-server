@@ -53,7 +53,7 @@ const resolvers = {
                 };
             }
         }),
-        friends: (_, __, context) => __awaiter(void 0, void 0, void 0, function* () {
+        connections: (_, __, context) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 const { session, prisma } = context;
                 if (!session) {
@@ -66,12 +66,18 @@ const resolvers = {
                         error: "Not authorized"
                     };
                 }
-                const friends = yield prisma.user.findMany({
+                const connections = yield prisma.user.findMany({
                     where: {
                         id: session.user.id
+                    },
+                    select: {
+                        connections: true
                     }
                 });
-                return friends;
+                return {
+                    data: connections,
+                    statusText: "OK"
+                };
             }
             catch (error) {
                 console.log(error);
@@ -253,6 +259,45 @@ const resolvers = {
                 };
             }
         }),
+        addConnection: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
+            try {
+                const { session, prisma } = context;
+                if (!session) {
+                    return {
+                        error: "Not Authorized!"
+                    };
+                }
+                if (!session.user) {
+                    return {
+                        error: "Not Authorized!"
+                    };
+                }
+                const connection = yield prisma.user.update({
+                    where: {
+                        id: session.user.id
+                    },
+                    data: {
+                        connections: {
+                            connect: {
+                                id: args.id,
+                            }
+                        }
+                    },
+                    include: {
+                        connections: true
+                    }
+                });
+                return {
+                    data: connection,
+                    statusText: "Connection Added!"
+                };
+            }
+            catch (error) {
+                return {
+                    error: error
+                };
+            }
+        })
     },
     // Subscription: {
     // }

@@ -47,7 +47,7 @@ const resolvers = {
         
       }
     },
-    friends: async (_: any, __: any, context: GraphQLContext) => {
+    connections: async (_: any, __: any, context: GraphQLContext) => {
       try {
         const { session, prisma } = context;
 
@@ -63,17 +63,20 @@ const resolvers = {
           }
         }
 
-        const friends = await prisma.user.findMany({
+        const connections = await prisma.user.findMany({
           where: {
             id: session.user.id
           },
           select: {
-            friends: true
+            connections: true
           }
         })
 
 
-        return friends
+        return {
+          data: connections,
+          statusText: "OK"
+        }
         
       } catch (error) {
         console.log(error)
@@ -292,6 +295,53 @@ const resolvers = {
         };
       }
     },
+
+    addConnection: async(_: any, args: {id: string}, context: GraphQLContext) => {
+      try {
+        const { session, prisma } = context
+
+        if(!session){
+          return {
+            error: "Not Authorized!"
+          }
+        }
+
+
+        if(!session.user){
+          return {
+            error: "Not Authorized!"
+          }
+        }
+
+
+
+        const connection = await prisma.user.update({
+          where: {
+            id: session.user.id
+          },
+          data: {
+            connections: {
+              connect: {
+                id: args.id,
+              }
+            }
+          },
+          include: {
+            connections: true
+          }
+        })
+
+        return {
+          data: connection,
+          statusText: "Connection Added!"
+        }
+
+      } catch (error) {
+        return {
+          error: error
+        }
+      }
+    }
   },
 
   // Subscription: {

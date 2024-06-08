@@ -35,7 +35,7 @@ declare const resolvers: {
                     createdAt: Date;
                     updatedAt: Date | null;
                     role: import(".prisma/client").$Enums.Role;
-                    friendId: string | null;
+                    connectionId: string | null;
                 };
             } & {
                 id: string;
@@ -89,7 +89,7 @@ declare const resolvers: {
                     createdAt: Date;
                     updatedAt: Date | null;
                     role: import(".prisma/client").$Enums.Role;
-                    friendId: string | null;
+                    connectionId: string | null;
                 };
             } & {
                 id: string;

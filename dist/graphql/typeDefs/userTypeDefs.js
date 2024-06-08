@@ -5,11 +5,13 @@ const typeDefs = (0, apollo_server_1.gql) `
   scalar Date
   scalar Upload
   scalar File
+  scalar Data
 
-  type AuthResponse {
+  type Response {
     token: String
     statusText: String
     error: String
+    data: Data
   }
 
   type SearchedUser{
@@ -25,8 +27,27 @@ const typeDefs = (0, apollo_server_1.gql) `
   }
 
   type User {
-    id: ID!
-    email: String!
+    id: ID
+    email: String
+    name: String
+    phone: String
+    image: String
+    first_name: String
+    middle_name: String
+    last_name: String
+    verification_code: String
+    is_active: Boolean
+    is_reported: Boolean
+    is_blocked: Boolean
+    createAt: Date
+    updatedAt: Date
+    role: String
+    connections: [Friend]
+  }
+
+  type Friend {
+    id: ID
+    email: String
     name: String
     phone: String
     image: String
@@ -43,12 +64,13 @@ const typeDefs = (0, apollo_server_1.gql) `
   }
 
   type Query {
-    friends(userId: String): [User]
-    searchUsers(name: String): SearchedUsersResponse
+    connections: Response
+    searchUsers(name: String): [SearchedUsersResponse]
   }
 
   type Mutation {
-    userLogin(email: String, password: String): AuthResponse
+    userLogin(email: String, password: String): Response
+    addConnection(id: String): Response
 
     createUserAccount(
       phone: String
@@ -56,7 +78,7 @@ const typeDefs = (0, apollo_server_1.gql) `
       firstName: String
       middleName: String
       lastName: String
-    ): AuthResponse
+    ): Response
 
     registerUser(
       email: String
@@ -65,7 +87,7 @@ const typeDefs = (0, apollo_server_1.gql) `
       firstName: String
       middleName: String
       lastName: String
-    ): AuthResponse
+    ): Response
   }
 `;
 exports.default = typeDefs;
