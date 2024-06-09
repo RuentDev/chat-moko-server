@@ -148,11 +148,7 @@ const resolvers = {
             };
           }
 
-          const _participants: {
-            conversationId: string;
-            userId: string;
-            hasSeenLatestMessage: boolean;
-          }[] = [];
+          const _participants: {  conversationId: string;  userId: string; hasSeenLatestMessage: boolean }[] = [];
 
           participants.forEach((id: string) => {
             if (userConversation) {
@@ -167,10 +163,9 @@ const resolvers = {
           /*
             CREATE ALL PARTICIPANTS
           */
-          const conversationParticipants =
-            await prisma.conversationParticipant.createMany({
-              data: _participants,
-            });
+          const conversationParticipants = await prisma.conversationParticipant.createMany({
+            data: _participants,
+          });
 
           if (!conversationParticipants) {
             return {
@@ -232,6 +227,7 @@ const resolvers = {
             statusText: "Message sent!",
           };
         }
+        
       } catch (error) {
         return {
           error: error,
