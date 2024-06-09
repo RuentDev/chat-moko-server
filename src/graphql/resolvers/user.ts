@@ -344,9 +344,7 @@ const resolvers = {
     }
   },
 
-  // Subscription: {
-
-  // }
+  // Subscription: {}
 };
 
 export default resolvers;

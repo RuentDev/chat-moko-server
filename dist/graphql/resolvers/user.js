@@ -299,8 +299,7 @@ const resolvers = {
             }
         })
     },
-    // Subscription: {
-    // }
+    // Subscription: {}
 };
 exports.default = resolvers;
 //# sourceMappingURL=user.js.map
