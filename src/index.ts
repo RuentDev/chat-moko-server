@@ -16,7 +16,7 @@ import express from "express";
 import http from "http";
 import cors from "cors";
 import { getServerSession } from "./util/index";
-
+// import {getServerSession} from 'next-auth'
 config();
 async function init() {
 

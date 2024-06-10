@@ -28,6 +28,7 @@ const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const cors_1 = __importDefault(require("cors"));
 const index_1 = require("./util/index");
+// import {getServerSession} from 'next-auth'
 (0, dotenv_1.config)();
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
