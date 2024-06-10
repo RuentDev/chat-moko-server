@@ -70,12 +70,11 @@ function init() {
             schema,
             csrfPrevention: true,
             plugins: [
+                (0, default_1.ApolloServerPluginLandingPageLocalDefault)({
+                    embed: true,
+                }),
                 // Proper shutdown for the HTTP server.
                 (0, drainHttpServer_1.ApolloServerPluginDrainHttpServer)({ httpServer }),
-                (0, default_1.ApolloServerPluginLandingPageProductionDefault)({
-                    embed: true,
-                    graphRef: "ruent.dev@gmail.com",
-                }),
                 // Proper shutdown for the WebSocket server.
                 {
                     serverWillStart() {

@@ -69,13 +69,12 @@ async function init() {
     schema,
     csrfPrevention: true,
     plugins: [
+      ApolloServerPluginLandingPageLocalDefault({ 
+        embed: true, 
+      }),
+      
       // Proper shutdown for the HTTP server.
       ApolloServerPluginDrainHttpServer({ httpServer }),
-      ApolloServerPluginLandingPageProductionDefault({ 
-        embed: true, 
-        graphRef: "ruent.dev@gmail.com",
-      }),
-
       // Proper shutdown for the WebSocket server.
       {
         async serverWillStart() {
