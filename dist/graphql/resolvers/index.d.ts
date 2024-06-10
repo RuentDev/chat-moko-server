@@ -4,10 +4,10 @@ declare const resolvers: {
             name: string;
         }, context: import("../../util/types").GraphQLContext) => Promise<{
             users: {
-                image: string | null;
                 name: string;
                 id: string;
                 email: string;
+                image: string | null;
             }[];
             error?: undefined;
         } | {
