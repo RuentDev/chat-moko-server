@@ -1,5 +1,6 @@
 
-import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";import { GraphQLContext, Session, SubscriptionContext } from "./util/types";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { GraphQLContext, Session, SubscriptionContext } from "./util/types";
 import {  ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault,} from '@apollo/server/plugin/landingPage/default'
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { expressMiddleware } from "@apollo/server/express4";
@@ -69,6 +70,7 @@ async function init() {
     schema,
     csrfPrevention: true,
     introspection: true,
+    cache: "bounded",
     plugins: [
       ApolloServerPluginLandingPageProductionDefault({ 
         embed: true, 
@@ -106,12 +108,19 @@ async function init() {
     cors<cors.CorsRequest>(corsOptions),
     express.json(),
     expressMiddleware(server, {
-      context: async ({ req }): Promise<GraphQLContext> => {
-        const session = await getServerSession(process.env.BASE_URL as string, req.headers.cookie);
-        return { session: session as Session, prisma, pubsub };
+      context: async ({ req, res }): Promise<GraphQLContext> => {
+        if(req.headers.origin && req.headers.cookie) {
+          const session = await getServerSession(req.headers.origin, req.headers.cookie);
+          console.log("WITH ORIGIN AND COOKIE");
+          return { session: session as Session, prisma, pubsub };
+        }else{
+          return { session: null, prisma, pubsub };
+        }
       },
     })
   );
+
+  // server.applyMiddleware({ app });
 
   httpServer.listen(PORT, () => {
     console.log(`Server is now running on http://localhost:${PORT}/graphql`);

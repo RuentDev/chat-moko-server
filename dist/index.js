@@ -70,6 +70,7 @@ function init() {
             schema,
             csrfPrevention: true,
             introspection: true,
+            cache: "bounded",
             plugins: [
                 (0, default_1.ApolloServerPluginLandingPageProductionDefault)({
                     embed: true,
@@ -103,11 +104,18 @@ function init() {
             credentials: true,
         };
         app.use("/graphql", (0, cors_1.default)(corsOptions), express_1.default.json(), (0, express4_1.expressMiddleware)(server, {
-            context: (_a) => __awaiter(this, [_a], void 0, function* ({ req }) {
-                const session = yield (0, index_1.getServerSession)(process.env.BASE_URL, req.headers.cookie);
-                return { session: session, prisma, pubsub };
+            context: (_a) => __awaiter(this, [_a], void 0, function* ({ req, res }) {
+                if (req.headers.origin && req.headers.cookie) {
+                    const session = yield (0, index_1.getServerSession)(req.headers.origin, req.headers.cookie);
+                    console.log("WITH ORIGIN AND COOKIE");
+                    return { session: session, prisma, pubsub };
+                }
+                else {
+                    return { session: null, prisma, pubsub };
+                }
             }),
         }));
+        // server.applyMiddleware({ app });
         httpServer.listen(PORT, () => {
             console.log(`Server is now running on http://localhost:${PORT}/graphql`);
         });
