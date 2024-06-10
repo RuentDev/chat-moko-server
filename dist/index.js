@@ -98,6 +98,7 @@ function init() {
             origin: [
                 process.env.BASE_URL,
                 process.env.ALLOWED_ORIGIN1,
+                process.env.ALLOWED_ORIGIN2,
             ],
             credentials: true,
         };

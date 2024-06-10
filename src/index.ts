@@ -96,6 +96,7 @@ async function init() {
     origin: [
       process.env.BASE_URL as string,
       process.env.ALLOWED_ORIGIN1 as string,
+      process.env.ALLOWED_ORIGIN2 as string,
     ],
     credentials: true,
   };
