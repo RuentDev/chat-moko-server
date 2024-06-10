@@ -86,6 +86,7 @@ async function init() {
         },
       },
     ],
+    introspection: true,
   });
 
   await server.start();

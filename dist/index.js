@@ -90,6 +90,7 @@ function init() {
                     },
                 },
             ],
+            introspection: true,
         });
         yield server.start();
         const corsOptions = {
