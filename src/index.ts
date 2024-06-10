@@ -109,6 +109,7 @@ async function init() {
     express.json(),
     expressMiddleware(server, {
       context: async ({ req, res }): Promise<GraphQLContext> => {
+        console.log("CHEKING FOR REQUES HEADER COOKIE");
         if(req.headers.origin && req.headers.cookie) {
           const session = await getServerSession(req.headers.origin, req.headers.cookie);
           console.log("WITH ORIGIN AND COOKIE");
@@ -120,7 +121,6 @@ async function init() {
     })
   );
 
-  // server.applyMiddleware({ app });
 
   httpServer.listen(PORT, () => {
     console.log(`Server is now running on http://localhost:${PORT}/graphql`);

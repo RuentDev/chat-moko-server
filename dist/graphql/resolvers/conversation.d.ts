@@ -3,19 +3,6 @@ import { GraphQLError } from "graphql";
 declare const resolvers: {
     Query: {
         conversations: (_: any, __: any, context: GraphQLContext) => Promise<GraphQLError | ({
-            messages: {
-                id: string;
-                type: import(".prisma/client").$Enums.MessageType;
-                content: string;
-                attachment_thumb_url: string | null;
-                attachment_url: string | null;
-                createdAt: Date;
-                updatedAt: Date | null;
-                deletedAt: Date | null;
-                isRead: boolean | null;
-                conversationId: string | null;
-                senderId: string;
-            }[];
             participants: ({
                 user: {
                     id: string;
@@ -43,6 +30,19 @@ declare const resolvers: {
                 conversationId: string;
                 hasSeenLatestMessage: boolean;
             })[];
+            messages: {
+                id: string;
+                type: import(".prisma/client").$Enums.MessageType;
+                content: string;
+                attachment_thumb_url: string | null;
+                attachment_url: string | null;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                isRead: boolean | null;
+                conversationId: string | null;
+                senderId: string;
+            }[];
         } & {
             id: string;
             title: string | null;
@@ -57,19 +57,6 @@ declare const resolvers: {
         getConversation: (_: any, args: {
             conversationId: string;
         }, context: GraphQLContext) => Promise<GraphQLError | ({
-            messages: {
-                id: string;
-                type: import(".prisma/client").$Enums.MessageType;
-                content: string;
-                attachment_thumb_url: string | null;
-                attachment_url: string | null;
-                createdAt: Date;
-                updatedAt: Date | null;
-                deletedAt: Date | null;
-                isRead: boolean | null;
-                conversationId: string | null;
-                senderId: string;
-            }[];
             participants: ({
                 user: {
                     id: string;
@@ -97,6 +84,19 @@ declare const resolvers: {
                 conversationId: string;
                 hasSeenLatestMessage: boolean;
             })[];
+            messages: {
+                id: string;
+                type: import(".prisma/client").$Enums.MessageType;
+                content: string;
+                attachment_thumb_url: string | null;
+                attachment_url: string | null;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                isRead: boolean | null;
+                conversationId: string | null;
+                senderId: string;
+            }[];
         } & {
             id: string;
             title: string | null;

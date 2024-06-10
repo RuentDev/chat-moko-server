@@ -50,8 +50,6 @@ const resolvers = {
       try {
         const { session, prisma } = context;
 
-        console.log(session);
-
         if (!session?.user) {
           return new GraphQLError("Not authorized");
         }
@@ -91,7 +89,6 @@ const resolvers = {
       subscribe: (_: any, __: any, context: GraphQLContext) => {
         try {
           const { pubsub } = context;
-          console.log("conversations subscribed");
           return pubsub.asyncIterator(["CONVERSATION_CREATED"]);
         } catch (error) {
           return {

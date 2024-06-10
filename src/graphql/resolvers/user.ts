@@ -79,7 +79,6 @@ const resolvers = {
         }
         
       } catch (error) {
-        console.log(error)
         return {
           error: error
         }
