@@ -72,7 +72,10 @@ function init() {
             plugins: [
                 // Proper shutdown for the HTTP server.
                 (0, drainHttpServer_1.ApolloServerPluginDrainHttpServer)({ httpServer }),
-                (0, default_1.ApolloServerPluginLandingPageProductionDefault)({ embed: true, graphRef: "myGraph@prod" }),
+                (0, default_1.ApolloServerPluginLandingPageProductionDefault)({
+                    embed: true,
+                    graphRef: "ruent.dev@gmail.com",
+                }),
                 // Proper shutdown for the WebSocket server.
                 {
                     serverWillStart() {

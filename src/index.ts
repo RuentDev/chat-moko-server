@@ -71,7 +71,10 @@ async function init() {
     plugins: [
       // Proper shutdown for the HTTP server.
       ApolloServerPluginDrainHttpServer({ httpServer }),
-      ApolloServerPluginLandingPageProductionDefault({ embed: true, graphRef: "myGraph@prod" }),
+      ApolloServerPluginLandingPageProductionDefault({ 
+        embed: true, 
+        graphRef: "ruent.dev@gmail.com",
+      }),
 
       // Proper shutdown for the WebSocket server.
       {
