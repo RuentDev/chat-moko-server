@@ -14,10 +14,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getServerSession = void 0;
 const node_fetch_1 = __importDefault(require("node-fetch"));
-const getServerSession = (cookie) => __awaiter(void 0, void 0, void 0, function* () {
+const getServerSession = (url, cookie) => __awaiter(void 0, void 0, void 0, function* () {
     if (!cookie)
         return;
-    const res = yield (0, node_fetch_1.default)(`${process.env.BASE_URL}/api/auth/session}`, {
+    const res = yield (0, node_fetch_1.default)(`${url}/api/auth/session`, {
         headers: { cookie: cookie },
     });
     const session = yield res.json();

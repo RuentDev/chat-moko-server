@@ -106,7 +106,7 @@ async function init() {
     express.json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
-        const session = await getServerSession(req.headers.cookie);
+        const session = await getServerSession(process.env.BASE_URL as string, req.headers.cookie);
         return { session: session as Session, prisma, pubsub };
       },
     })

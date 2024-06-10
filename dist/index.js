@@ -103,7 +103,7 @@ function init() {
         };
         app.use("/graphql", (0, cors_1.default)(corsOptions), express_1.default.json(), (0, express4_1.expressMiddleware)(server, {
             context: (_a) => __awaiter(this, [_a], void 0, function* ({ req }) {
-                const session = yield (0, index_1.getServerSession)(req.headers.cookie);
+                const session = yield (0, index_1.getServerSession)(process.env.BASE_URL, req.headers.cookie);
                 return { session: session, prisma, pubsub };
             }),
         }));

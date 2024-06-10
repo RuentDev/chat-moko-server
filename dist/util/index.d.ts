@@ -1,1 +1,1 @@
-export declare const getServerSession: (cookie?: string) => Promise<any>;
+export declare const getServerSession: (url: string, cookie?: string) => Promise<any>;
