@@ -17,7 +17,7 @@ const node_fetch_1 = __importDefault(require("node-fetch"));
 const getServerSession = (cookie) => __awaiter(void 0, void 0, void 0, function* () {
     if (!cookie)
         return;
-    const res = yield (0, node_fetch_1.default)('http://localhost:3000/api/auth/session', {
+    const res = yield (0, node_fetch_1.default)(`${process.env.BASE_URL}/api/auth/session}`, {
         headers: { cookie: cookie },
     });
     const session = yield res.json();

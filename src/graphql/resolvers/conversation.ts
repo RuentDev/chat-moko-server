@@ -50,6 +50,8 @@ const resolvers = {
       try {
         const { session, prisma } = context;
 
+        console.log(session);
+
         if (!session?.user) {
           return new GraphQLError("Not authorized");
         }

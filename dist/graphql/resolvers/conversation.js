@@ -52,6 +52,7 @@ const resolvers = {
         getConversation: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 const { session, prisma } = context;
+                console.log(session);
                 if (!(session === null || session === void 0 ? void 0 : session.user)) {
                     return new graphql_1.GraphQLError("Not authorized");
                 }
