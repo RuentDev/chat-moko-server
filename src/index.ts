@@ -1,5 +1,6 @@
-import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-import { GraphQLContext, Session, SubscriptionContext } from "./util/types";
+
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";import { GraphQLContext, Session, SubscriptionContext } from "./util/types";
+import {  ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault,} from '@apollo/server/plugin/landingPage/default'
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { expressMiddleware } from "@apollo/server/express4";
 import { useServer } from "graphql-ws/lib/use/ws";
@@ -70,6 +71,7 @@ async function init() {
     plugins: [
       // Proper shutdown for the HTTP server.
       ApolloServerPluginDrainHttpServer({ httpServer }),
+      ApolloServerPluginLandingPageProductionDefault({ embed: true, graphRef: "myGraph@prod" }),
 
       // Proper shutdown for the WebSocket server.
       {
@@ -112,3 +114,4 @@ async function init() {
 }
 
 init().catch((err) => console.log(err));
+
