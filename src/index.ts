@@ -110,8 +110,7 @@ async function init() {
     expressMiddleware(server, {
       context: async ({ req, res }): Promise<GraphQLContext> => {
         console.log("CHEKING FOR REQUES HEADER COOKIE");
-        console.log(req)
-        console.log(req.headers)
+        console.log(req.cookies);
         if(req.headers.origin && req.headers.cookie) {
           const session = await getServerSession(req.headers.origin, req.headers.cookie);
           console.log("WITH ORIGIN AND COOKIE");
