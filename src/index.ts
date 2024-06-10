@@ -68,9 +68,11 @@ async function init() {
   const server = new ApolloServer({
     schema,
     csrfPrevention: true,
+    introspection: true,
     plugins: [
-      ApolloServerPluginLandingPageLocalDefault({ 
+      ApolloServerPluginLandingPageProductionDefault({ 
         embed: true, 
+        graphRef: process.env.GRAPH_REF as string
       }),
       
       // Proper shutdown for the HTTP server.
@@ -86,7 +88,6 @@ async function init() {
         },
       },
     ],
-    introspection: true,
   });
 
   await server.start();

@@ -69,9 +69,11 @@ function init() {
         const server = new server_1.ApolloServer({
             schema,
             csrfPrevention: true,
+            introspection: true,
             plugins: [
-                (0, default_1.ApolloServerPluginLandingPageLocalDefault)({
+                (0, default_1.ApolloServerPluginLandingPageProductionDefault)({
                     embed: true,
+                    graphRef: process.env.GRAPH_REF
                 }),
                 // Proper shutdown for the HTTP server.
                 (0, drainHttpServer_1.ApolloServerPluginDrainHttpServer)({ httpServer }),
@@ -90,7 +92,6 @@ function init() {
                     },
                 },
             ],
-            introspection: true,
         });
         yield server.start();
         const corsOptions = {
