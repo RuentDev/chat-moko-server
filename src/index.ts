@@ -106,10 +106,10 @@ async function init() {
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
 
-        console.log("AUTHORIZATION: ", req.headers.cookie)
+        console.log("AUTHORIZATION: ", req.headers.authorization)
 
-        if(req.headers.origin && req.headers.cookie) {
-          const session = await getServerSession(req.headers.origin, req.headers.cookie);
+        if(req.headers.origin && req.headers.authorization) {
+          const session = await getServerSession(req.headers.origin, req.headers.authorization);
           console.log("WITH ORIGIN AND COOKIE");
           return { session: session as Session, prisma, pubsub };
         }else{

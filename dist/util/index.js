@@ -18,7 +18,7 @@ const getServerSession = (url, cookie) => __awaiter(void 0, void 0, void 0, func
     if (!cookie)
         return;
     const res = yield (0, node_fetch_1.default)(`${url}/api/auth/session`, {
-        headers: { cookie: cookie },
+        headers: { cookie: cookie.replace("Bearer ", "") },
     });
     const session = yield res.json();
     return session;
