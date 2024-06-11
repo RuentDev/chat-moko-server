@@ -105,12 +105,8 @@ async function init() {
     express.json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
-        if(req.headers.origin && req.headers.authorization) {
+        if(req.headers.origin) {
           const session = await getServerSession(req.headers.origin, req.headers.authorization);
-
-
-
-          console.log("session RESULT", session);
           return { session: session as Session, prisma, pubsub };
         }else{
           return { session: null, prisma, pubsub };

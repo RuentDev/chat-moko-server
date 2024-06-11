@@ -106,9 +106,8 @@ function init() {
         };
         app.use("/graphql", (0, cors_1.default)(corsOptions), express_1.default.json(), (0, express4_1.expressMiddleware)(server, {
             context: (_a) => __awaiter(this, [_a], void 0, function* ({ req }) {
-                if (req.headers.origin && req.headers.authorization) {
+                if (req.headers.origin) {
                     const session = yield (0, index_1.getServerSession)(req.headers.origin, req.headers.authorization);
-                    console.log("session RESULT", session);
                     return { session: session, prisma, pubsub };
                 }
                 else {
