@@ -4,10 +4,10 @@ declare const resolvers: {
             name: string;
         }, context: import("../../util/types").GraphQLContext) => Promise<{
             users: {
-                id: string;
-                name: string;
-                email: string;
                 image: string | null;
+                name: string;
+                id: string;
+                email: string;
             }[];
             error?: undefined;
         } | {
@@ -134,6 +134,19 @@ declare const resolvers: {
 } & {
     Query: {
         conversations: (_: any, __: any, context: import("../../util/types").GraphQLContext) => Promise<import("graphql").GraphQLError | ({
+            messages: {
+                id: string;
+                type: import(".prisma/client").$Enums.MessageType;
+                content: string;
+                attachment_thumb_url: string | null;
+                attachment_url: string | null;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                isRead: boolean | null;
+                conversationId: string | null;
+                senderId: string;
+            }[];
             participants: ({
                 user: {
                     id: string;
@@ -161,19 +174,6 @@ declare const resolvers: {
                 conversationId: string;
                 hasSeenLatestMessage: boolean;
             })[];
-            messages: {
-                id: string;
-                type: import(".prisma/client").$Enums.MessageType;
-                content: string;
-                attachment_thumb_url: string | null;
-                attachment_url: string | null;
-                createdAt: Date;
-                updatedAt: Date | null;
-                deletedAt: Date | null;
-                isRead: boolean | null;
-                conversationId: string | null;
-                senderId: string;
-            }[];
         } & {
             id: string;
             title: string | null;
@@ -188,6 +188,19 @@ declare const resolvers: {
         getConversation: (_: any, args: {
             conversationId: string;
         }, context: import("../../util/types").GraphQLContext) => Promise<import("graphql").GraphQLError | ({
+            messages: {
+                id: string;
+                type: import(".prisma/client").$Enums.MessageType;
+                content: string;
+                attachment_thumb_url: string | null;
+                attachment_url: string | null;
+                createdAt: Date;
+                updatedAt: Date | null;
+                deletedAt: Date | null;
+                isRead: boolean | null;
+                conversationId: string | null;
+                senderId: string;
+            }[];
             participants: ({
                 user: {
                     id: string;
@@ -215,19 +228,6 @@ declare const resolvers: {
                 conversationId: string;
                 hasSeenLatestMessage: boolean;
             })[];
-            messages: {
-                id: string;
-                type: import(".prisma/client").$Enums.MessageType;
-                content: string;
-                attachment_thumb_url: string | null;
-                attachment_url: string | null;
-                createdAt: Date;
-                updatedAt: Date | null;
-                deletedAt: Date | null;
-                isRead: boolean | null;
-                conversationId: string | null;
-                senderId: string;
-            }[];
         } & {
             id: string;
             title: string | null;

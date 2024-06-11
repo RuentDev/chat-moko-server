@@ -7,10 +7,10 @@ declare const resolvers: {
             name: string;
         }, context: GraphQLContext) => Promise<{
             users: {
-                id: string;
-                name: string;
-                email: string;
                 image: string | null;
+                name: string;
+                id: string;
+                email: string;
             }[];
             error?: undefined;
         } | {
