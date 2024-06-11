@@ -38,10 +38,8 @@ async function init() {
 
   const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-  const getSubscriptionContext = async (
-    ctx: SubscriptionContext
-  ): Promise<GraphQLContext> => {
-    ctx;
+  const getSubscriptionContext = async ( ctx: SubscriptionContext ): Promise<GraphQLContext> => { 
+    // ctx;
     // ctx is the graphql-ws Context where connectionParams live
     if (ctx.connectionParams && ctx.connectionParams.session) {
       const { session } = ctx.connectionParams;
@@ -53,18 +51,13 @@ async function init() {
 
   // Hand in the schema we just created and have the
   // WebSocketServer start listening.
-  const serverCleanup = useServer(
-    {
-      schema,
-      context: (ctx: SubscriptionContext) => {
-        // This will be run every time the client sends a subscription request
-        // Returning an object will add that information to our
-        // GraphQL context, which all of our resolvers have access to.
-        return getSubscriptionContext(ctx);
-      },
-    },
-    wsServer
-  );
+  const context = (ctx: SubscriptionContext) => {
+    // This will be run every time the client sends a subscription request
+    // Returning an object will add that information to our
+    // GraphQL context, which all of our resolvers have access to.
+    return getSubscriptionContext(ctx);
+  }
+  const serverCleanup = useServer( { schema, context }, wsServer);
 
   const server = new ApolloServer({
     schema,
@@ -74,9 +67,10 @@ async function init() {
     plugins: [
       ApolloServerPluginLandingPageProductionDefault({ 
         embed: true, 
-        graphRef: process.env.GRAPH_REF as string
+        graphRef: process.env.GRAPH_REF as string,
+        includeCookies: true,
       }),
-      
+      // ApolloServerPluginLandingPageLocalDefault({embed: true, ''}),
       // Proper shutdown for the HTTP server.
       ApolloServerPluginDrainHttpServer({ httpServer }),
       // Proper shutdown for the WebSocket server.
@@ -90,6 +84,7 @@ async function init() {
         },
       },
     ],
+    
   });
 
   await server.start();
@@ -108,9 +103,7 @@ async function init() {
     cors<cors.CorsRequest>(corsOptions),
     express.json(),
     expressMiddleware(server, {
-      context: async ({ req, res }): Promise<GraphQLContext> => {
-        console.log("CHEKING FOR REQUES HEADER COOKIE");
-        console.log(req.headers);
+      context: async ({ req }): Promise<GraphQLContext> => {
         if(req.headers.origin && req.headers.cookie) {
           const session = await getServerSession(req.headers.origin, req.headers.cookie);
           console.log("WITH ORIGIN AND COOKIE");
@@ -124,7 +117,7 @@ async function init() {
 
 
   httpServer.listen(PORT, () => {
-    console.log(`Server is now running on http://localhost:${PORT}/graphql`);
+    console.log(`Server is now running on: ${PORT}`);
   });
 }
 

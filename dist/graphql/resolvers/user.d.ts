@@ -8,8 +8,8 @@ declare const resolvers: {
         }, context: GraphQLContext) => Promise<{
             users: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
                 image: string | null;
             }[];
             error?: undefined;
