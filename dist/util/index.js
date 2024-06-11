@@ -22,7 +22,7 @@ const getServerSession = (url, cookie) => __awaiter(void 0, void 0, void 0, func
         headers: { cookie: cookie.replace("Bearer ", "") },
     });
     const session = yield res.json();
-    console.log("SESSION: ", session);
+    console.log("SESSION: ", url, session);
     return session;
 });
 exports.getServerSession = getServerSession;

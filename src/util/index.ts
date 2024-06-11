@@ -7,7 +7,7 @@ export const getServerSession = async (url: string, cookie?: string) => {
     headers: { cookie: cookie.replace("Bearer ", "") },
   });
   const session = await res.json();
-  console.log("SESSION: ", session)
+  console.log("SESSION: ", url ,session)
   
   return session;
 };
