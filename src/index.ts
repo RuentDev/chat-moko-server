@@ -57,6 +57,7 @@ async function init() {
     // GraphQL context, which all of our resolvers have access to.
     return getSubscriptionContext(ctx);
   }
+
   const serverCleanup = useServer( { schema, context }, wsServer);
 
   const server = new ApolloServer({
@@ -104,6 +105,9 @@ async function init() {
     express.json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
+
+        console.log("AUTHORIZATION: ", req.headers.cookie)
+
         if(req.headers.origin && req.headers.cookie) {
           const session = await getServerSession(req.headers.origin, req.headers.cookie);
           console.log("WITH ORIGIN AND COOKIE");
