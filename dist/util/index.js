@@ -17,15 +17,12 @@ const node_fetch_1 = __importDefault(require("node-fetch"));
 const getServerSession = (url, cookie) => __awaiter(void 0, void 0, void 0, function* () {
     if (!cookie)
         return;
-    console.log("SESSION: ", url, cookie);
-    // console.log(new Date(), "COOKIE: ", cookie)
     const res = yield (0, node_fetch_1.default)(`${url}/api/auth/session`, {
         headers: {
             "Cookie": cookie.replace("Bearer ", ""),
         },
     });
     const session = yield res.json();
-    console.log("SESSION: ", url, session);
     return session;
 });
 exports.getServerSession = getServerSession;
