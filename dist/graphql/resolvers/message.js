@@ -111,7 +111,7 @@ const resolvers = {
                 const message = yield prisma.message.create({
                     data: {
                         conversationId: userConversation.id,
-                        senderId: participants[0],
+                        senderId: session.user.id,
                         content: content,
                     }
                 });
