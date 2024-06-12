@@ -21,8 +21,8 @@ exports.pubsub = new graphql_subscriptions_1.PubSub();
 const jwt_secret = process.env.JWT_SECRET;
 const resolvers = {
     Query: {
-        searchUsers: (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
-            var _a;
+        searchConnections: (_1, _a, context_1) => __awaiter(void 0, [_1, _a, context_1], void 0, function* (_, { name }, context) {
+            var _b;
             try {
                 const { session, prisma } = context;
                 if (!session) {
@@ -31,8 +31,8 @@ const resolvers = {
                 const users = yield prisma.user.findMany({
                     where: {
                         name: {
-                            contains: args.name,
-                            not: (_a = session.user) === null || _a === void 0 ? void 0 : _a.name,
+                            contains: name,
+                            not: (_b = session.user) === null || _b === void 0 ? void 0 : _b.name,
                             mode: "insensitive",
                         }
                     },
@@ -43,8 +43,13 @@ const resolvers = {
                         image: true,
                     }
                 });
+                if (!name) {
+                    return {
+                        data: null
+                    };
+                }
                 return {
-                    users: users
+                    data: users
                 };
             }
             catch (error) {

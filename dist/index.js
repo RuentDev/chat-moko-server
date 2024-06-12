@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const drainHttpServer_1 = require("@apollo/server/plugin/drainHttpServer");
-const default_1 = require("@apollo/server/plugin/landingPage/default");
 const schema_1 = require("@graphql-tools/schema");
 const express4_1 = require("@apollo/server/express4");
 const ws_1 = require("graphql-ws/lib/use/ws");
@@ -71,11 +70,11 @@ function init() {
             introspection: true,
             cache: "bounded",
             plugins: [
-                (0, default_1.ApolloServerPluginLandingPageProductionDefault)({
-                    embed: true,
-                    graphRef: process.env.GRAPH_REF,
-                    includeCookies: true,
-                }),
+                // ApolloServerPluginLandingPageProductionDefault({ 
+                //   embed: true, 
+                //   graphRef: process.env.GRAPH_REF as string,
+                //   includeCookies: true,
+                // }),
                 // ApolloServerPluginLandingPageLocalDefault({embed: true, ''}),
                 // Proper shutdown for the HTTP server.
                 (0, drainHttpServer_1.ApolloServerPluginDrainHttpServer)({ httpServer }),

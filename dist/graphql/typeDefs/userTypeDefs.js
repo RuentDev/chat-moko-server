@@ -15,7 +15,7 @@ const typeDefs = (0, apollo_server_1.gql) `
   }
 
   type SearchedUser{
-    id: ID!
+    id: ID
     name: String
     email: String
     image: String
@@ -23,7 +23,7 @@ const typeDefs = (0, apollo_server_1.gql) `
 
   type SearchedUsersResponse {
     error: String
-    users: [SearchedUser]
+    data: [SearchedUser]
   }
 
   type User {
@@ -65,7 +65,7 @@ const typeDefs = (0, apollo_server_1.gql) `
 
   type Query {
     connections: Response
-    searchUsers(name: String): [SearchedUsersResponse]
+    searchConnections(name: String): SearchedUsersResponse
   }
 
   type Mutation {

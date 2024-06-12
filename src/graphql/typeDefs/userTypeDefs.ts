@@ -14,7 +14,7 @@ const typeDefs = gql`
   }
 
   type SearchedUser{
-    id: ID!
+    id: ID
     name: String
     email: String
     image: String
@@ -22,7 +22,7 @@ const typeDefs = gql`
 
   type SearchedUsersResponse {
     error: String
-    users: [SearchedUser]
+    data: [SearchedUser]
   }
 
   type User {
@@ -64,7 +64,7 @@ const typeDefs = gql`
 
   type Query {
     connections: Response
-    searchUsers(name: String): [SearchedUsersResponse]
+    searchConnections(name: String): SearchedUsersResponse
   }
 
   type Mutation {

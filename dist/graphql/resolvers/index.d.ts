@@ -1,18 +1,21 @@
 declare const resolvers: {
     Query: {
-        searchUsers: (_: any, args: {
+        searchConnections: (_: any, { name }: {
             name: string;
         }, context: import("../../util/types").GraphQLContext) => Promise<{
-            users: {
+            data: null;
+            error?: undefined;
+        } | {
+            data: {
+                name: string;
                 id: string;
                 email: string;
-                name: string;
                 image: string | null;
             }[];
             error?: undefined;
         } | {
             error: unknown;
-            users?: undefined;
+            data?: undefined;
         }>;
         connections: (_: any, __: any, context: import("../../util/types").GraphQLContext) => Promise<{
             data: {

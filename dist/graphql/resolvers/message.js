@@ -113,7 +113,10 @@ const resolvers = {
                         conversationId: userConversation.id,
                         senderId: session.user.id,
                         content: content,
-                    }
+                    },
+                    include: {
+                        user: true,
+                    },
                 });
                 if (!message) {
                     return {

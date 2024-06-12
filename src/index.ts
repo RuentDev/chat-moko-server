@@ -66,11 +66,11 @@ async function init() {
     introspection: true,
     cache: "bounded",
     plugins: [
-      ApolloServerPluginLandingPageProductionDefault({ 
-        embed: true, 
-        graphRef: process.env.GRAPH_REF as string,
-        includeCookies: true,
-      }),
+      // ApolloServerPluginLandingPageProductionDefault({ 
+      //   embed: true, 
+      //   graphRef: process.env.GRAPH_REF as string,
+      //   includeCookies: true,
+      // }),
       // ApolloServerPluginLandingPageLocalDefault({embed: true, ''}),
       // Proper shutdown for the HTTP server.
       ApolloServerPluginDrainHttpServer({ httpServer }),

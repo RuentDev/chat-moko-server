@@ -10,19 +10,18 @@ const jwt_secret = process.env.JWT_SECRET;
 
 const resolvers = {
   Query: {
-    searchUsers: async (_: any, args: {name: string}, context: GraphQLContext) => {
+    searchConnections: async (_: any, { name }: {name: string}, context: GraphQLContext) => {
       try {
-        const {session, prisma} = context
+        const { session, prisma } = context
 
         if(!session){
           throw new GraphQLError("Not authorized")
         }
 
-
         const users = await prisma.user.findMany({
           where: {
             name: {
-              contains: args.name,
+              contains: name,
               not: session.user?.name,
               mode: "insensitive",
             }
@@ -35,8 +34,14 @@ const resolvers = {
           }
         })
 
+        if(!name){
+          return {
+            data: null
+          }
+        }
+
         return {
-          users: users
+          data: users
         }
 
       } catch (error) {

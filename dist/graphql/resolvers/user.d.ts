@@ -3,19 +3,22 @@ import { GraphQLContext } from "../../util/types";
 export declare const pubsub: PubSub;
 declare const resolvers: {
     Query: {
-        searchUsers: (_: any, args: {
+        searchConnections: (_: any, { name }: {
             name: string;
         }, context: GraphQLContext) => Promise<{
-            users: {
-                image: string | null;
+            data: null;
+            error?: undefined;
+        } | {
+            data: {
                 name: string;
                 id: string;
                 email: string;
+                image: string | null;
             }[];
             error?: undefined;
         } | {
             error: unknown;
-            users?: undefined;
+            data?: undefined;
         }>;
         connections: (_: any, __: any, context: GraphQLContext) => Promise<{
             data: {
