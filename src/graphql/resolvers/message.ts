@@ -54,14 +54,7 @@ const resolvers = {
   },
 
   Mutation: {
-    sendMessage: async (
-      _: any,
-      args: {
-        conversationId: string;
-        senderId: string;
-        participants: string[];
-        content: string;
-      },
+    sendMessage: async ( _: any, args: { conversationId: string; senderId: string; participants: string[]; content: string },
       context: GraphQLContext
     ) => {
       try {
@@ -73,73 +66,16 @@ const resolvers = {
           throw new GraphQLError("Not authorized");
         }
 
-        /*
-          check all participants if exising in the user table
-        */
-        const useParticipants = await prisma.user.findMany({
-          where: {
-            id: {
-              in: participants,
-            },
-          },
-        });
-
-        if (useParticipants.length !== participants.length) {
-          return {
-            error: "Conversation participants not found",
-          };
-        }
-
-        if (conversationId) {
-          /*
-            check all convesation where conversation id exist
-          */
-          userConversation = await prisma.conversation.findFirst({
-            where: {
-              id: conversationId,
-            },
-            include: {
-              participants: true,
-              messages: true,
-            },
-          });
-
-          if (!userConversation) {
-            return new GraphQLError(
-              "Conversation ID was detected but it not existing to database"
-            );
-          }
-        } else {
-          /*
-            check all convesation where participant id exist
-          */
-          userConversation = await prisma.conversation.findFirst({
-            where: {
-              participants: {
-                every: {
-                  userId: {
-                    in: [...participants],
-                  },
-                },
-              },
-            },
-            include: {
-              participants: true,
-            },
-          });
-        }
-
-        if (!userConversation) {
-          /*
-            create conversation if not existing
-          */
+        // IF CONVERSATION ID IS NOT DETECTED
+        if(!conversationId){
+          /* create conversation if not existing */
           userConversation = await prisma.conversation.create({
             data: {
               creatorId: session.user.id,
-            },
-            include: {
-              participants: true,
-            },
+              participants: {
+                connect: participants.map((id: string) => ({ id })),
+              }
+            }
           });
 
           if (!userConversation) {
@@ -148,40 +84,12 @@ const resolvers = {
             };
           }
 
-          const _participants: {  conversationId: string;  userId: string; hasSeenLatestMessage: boolean }[] = [];
-
-          participants.forEach((id: string) => {
-            if (userConversation) {
-              _participants.push({
-                conversationId: userConversation.id,
-                userId: id,
-                hasSeenLatestMessage: false,
-              });
-            }
-          });
-
-          /*
-            CREATE ALL PARTICIPANTS
-          */
-          const conversationParticipants = await prisma.conversationParticipant.createMany({
-            data: _participants,
-          });
-
-          if (!conversationParticipants) {
-            return {
-              error: "Failed to create conversation participants",
-            };
-          }
-
           const message = await prisma.message.create({
             data: {
               senderId: session.user.id,
               content: content,
               conversationId: userConversation.id,
-            },
-            include: {
-              user: true,
-            },
+            }
           });
 
           if (!message) {
@@ -201,32 +109,46 @@ const resolvers = {
           return {
             statusText: "Message sent!",
           };
-        } else {
-          const message = await prisma.message.create({
-            data: {
-              senderId: session.user.id,
-              content: content,
-              conversationId: userConversation.id,
-            },
-            include: {
-              user: true,
-            },
-          });
-
-          if (!message) {
-            return {
-              error: "Failed to send message",
-            };
+        }
+        
+        /*
+          check all convesation where conversation id exist
+        */
+        userConversation = await prisma.conversation.findFirst({
+          where: {
+            id: conversationId,
           }
+        });
 
-          pubsub.publish("MESSAGE_SENT", {
-            messageSent: message,
-          });
+        if (!userConversation) {
+          return new GraphQLError(
+            "Conversation ID was detected but it not existing to database"
+          );
+        }
 
+        const message = await prisma.message.create({
+          data: {
+            conversationId: userConversation.id,
+            senderId: participants[0],
+            content: content,
+          }
+        });
+
+        if (!message) {
           return {
-            statusText: "Message sent!",
+            error: "Failed to send message",
           };
         }
+
+        pubsub.publish("MESSAGE_SENT", {
+          messageSent: message,
+        });
+
+        return {
+          statusText: "Message sent!",
+        };
+
+
         
       } catch (error) {
         return {
