@@ -10,10 +10,10 @@ declare const resolvers: {
             error?: undefined;
         } | {
             data: {
+                image: string | null;
                 name: string;
                 id: string;
                 email: string;
-                image: string | null;
             }[];
             error?: undefined;
         } | {

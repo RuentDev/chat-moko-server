@@ -4,13 +4,14 @@ import { GraphQLError } from "graphql";
 
 const resolvers = {
   Query: {
+    
     conversations: async (_: any, __: any, context: GraphQLContext) => {
       try {
         const { session, prisma } = context;
 
-        if (!session?.user) {
-          return new GraphQLError("Not authorized");
-        }
+        // if (!session?.user) {
+        //   return new GraphQLError("Not authorized");
+        // }
 
         const conversations = await prisma.conversation.findMany({
           where: {
@@ -42,6 +43,7 @@ const resolvers = {
         }
       }
     },
+
     getConversation: async (
       _: any,
       args: { conversationId: string },
