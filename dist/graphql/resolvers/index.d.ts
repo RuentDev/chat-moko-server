@@ -136,7 +136,7 @@ declare const resolvers: {
     };
 } & {
     Query: {
-        conversations: (_: any, __: any, context: import("../../util/types").GraphQLContext) => Promise<({
+        conversations: (_: any, __: any, context: import("../../util/types").GraphQLContext) => Promise<import("graphql").GraphQLError | ({
             participants: ({
                 user: {
                     id: string;

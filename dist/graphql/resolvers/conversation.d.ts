@@ -2,7 +2,7 @@ import { GraphQLContext } from "../../util/types";
 import { GraphQLError } from "graphql";
 declare const resolvers: {
     Query: {
-        conversations: (_: any, __: any, context: GraphQLContext) => Promise<({
+        conversations: (_: any, __: any, context: GraphQLContext) => Promise<GraphQLError | ({
             participants: ({
                 user: {
                     id: string;

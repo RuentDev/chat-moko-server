@@ -9,9 +9,9 @@ const resolvers = {
       try {
         const { session, prisma } = context;
 
-        // if (!session?.user) {
-        //   return new GraphQLError("Not authorized");
-        // }
+        if (!session?.user) {
+          return new GraphQLError("Not authorized");
+        }
 
         const conversations = await prisma.conversation.findMany({
           where: {
